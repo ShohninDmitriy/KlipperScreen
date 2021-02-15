@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-11 22:13+0100\n"
-"PO-Revision-Date: 2021-02-12 02:24+0100\n"
+"PO-Revision-Date: 2021-02-15 22:46+0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: Russian <kde-i18n-de@kde.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.2.1\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
@@ -339,7 +339,7 @@ msgstr "Двигать"
 
 #: panels/move.py:91
 msgid "Move Distance (mm)"
-msgstr "Дистанция перемещения (mm)"
+msgstr "Дистанция перемещения (мм)"
 
 #: panels/print.py:23
 msgid "Name"
@@ -429,7 +429,7 @@ msgstr "Сохранить"
 
 #: ks_includes/KlipperScreen.conf:141
 msgid "Save Config"
-msgstr "Сохранить настройки"
+msgstr "Сохр. Конфиг"
 
 #: ks_includes/KlipperScreen.conf:146
 msgid "Save configuration."
@@ -457,7 +457,7 @@ msgstr "Размер"
 
 #: ks_includes/config.py:44
 msgid "Slicer"
-msgstr "Slicer"
+msgstr "Слайсер"
 
 #. This line for translations only
 #: panels/extrude.py:31
@@ -546,7 +546,7 @@ msgstr "минут"
 
 #: panels/fine_tune.py:38
 msgid "mm"
-msgstr "mm"
+msgstr "мм"
 
 #~ msgid "Klipper"
 #~ msgstr "Klipper"
