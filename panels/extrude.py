@@ -22,9 +22,9 @@ class ExtrudePanel(ScreenPanel):
         self.speed = "Medium"
         self.speeds = ["Slow", "Medium", "Fast"]
         self.speed_trans = {
-            "Slow": "300",
-            "Medium": "800",
-            "Fast": "1400"
+            "Slow": "120",
+            "Medium": "300",
+            "Fast": "600"
         }
 
         # This line for translations only

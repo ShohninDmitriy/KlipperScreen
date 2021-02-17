@@ -16,8 +16,8 @@ class FineTunePanel(ScreenPanel):
     user_selecting = False
 
     bs = 0
-    bs_delta = "0.05"
-    bs_deltas = ["0.01","0.05"]
+    bs_delta = "0.005"
+    bs_deltas = ["0.01","0.005"]
     percent_delta = 1
     percent_deltas = ['1','5','10','25']
     fan = 100
@@ -35,7 +35,7 @@ class FineTunePanel(ScreenPanel):
 
         self.labels['z+'] = self._gtk.ButtonImage("move-z-", _("Z+"), "color1")
         self.labels['z+'].connect("clicked", self.change_babystepping, "+")
-        self.labels['zoffset'] = Gtk.Label("0.00" + _("mm"))
+        self.labels['zoffset'] = Gtk.Label("0.000" + _("mm"))
         self.labels['zoffset'].get_style_context().add_class('temperature_entry')
         self.labels['z-'] = self._gtk.ButtonImage("move-z+", _("Z-"), "color1")
         self.labels['z-'].connect("clicked", self.change_babystepping, "-")
@@ -118,7 +118,7 @@ class FineTunePanel(ScreenPanel):
 
         if "gcode_move" in data:
             if "homing_origin" in data["gcode_move"]:
-                self.labels['zoffset'].set_text("%.2fmm" % data["gcode_move"]["homing_origin"][2])
+                self.labels['zoffset'].set_text("%.3fmm" % data["gcode_move"]["homing_origin"][2])
             if "extrude_factor" in data["gcode_move"]:
                 self.extrusion = int(data["gcode_move"]["extrude_factor"]*100)
                 self.labels['extrudefactor'].set_text("%3d%%" % self.extrusion)
