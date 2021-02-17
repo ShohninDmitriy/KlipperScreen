@@ -5,7 +5,7 @@
 window {
 	background-color: #13181C;
 	-gtk-icon-shadow: none;
-	font-size: 30px;
+	font-size: 20px;
 }
 
 scrollbar, scrollbar button {
@@ -94,7 +94,7 @@ button.keyboard {
 
 .dialog {
 	border: 2px solid black;
-	font-size: 30px;
+	font-size: 20px;
 	padding: 50px;
 	background-color: #000;
 }
@@ -106,7 +106,7 @@ button.keyboard {
 
 .dialog {
 	border: 2px solid black;
-	font-size: 30px;
+	font-size: 20px;
 	padding: 50px;
 	background-color: #000;
 }
@@ -118,7 +118,7 @@ button.keyboard {
 
 .message {
 	border: 2px solid #981E1F;
-	font-size: 30px;
+	font-size: 20px;
 	padding: 50px;
 	color: #FFF;
 	background-color: #981E1F;
