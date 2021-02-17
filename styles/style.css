@@ -57,7 +57,7 @@ combobox box button {
 }
 
 entry {
-	font-size: 1.2em;
+	font-size: 1em;
 	background-color: #20292F;
     border: 0;
 	padding: .25em;
@@ -315,7 +315,7 @@ trough {
 
 .message {
 	border: .1em solid #981E1F;
-	font-size: 1.2em;
+	font-size: 1em;
 	padding: 2.5em;
 	color: #FFF;
 	background-color: #981E1F;
