@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-11 22:13+0100\n"
-"PO-Revision-Date: 2021-02-15 22:50+0300\n"
+"PO-Revision-Date: 2021-02-17 05:08+0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: Russian <kde-i18n-de@kde.org>\n"
 "Language: ru\n"
@@ -121,7 +121,7 @@ msgstr "Удалить"
 
 #: ks_includes/KlipperScreen.conf:108
 msgid "Disable Motors"
-msgstr "Отключить моторы"
+msgstr "Откл. моторы"
 
 #: panels/bed_level.py:107
 msgid "Disable XY"
@@ -195,7 +195,7 @@ msgstr "Точная настройка"
 #: panels/splash_screen.py:64 panels/system.py:24
 msgid "Firmware Restart"
 msgstr ""
-"Перезагрузка\n"
+"Рестарт\n"
 "прошивки"
 
 #: screen.py:300 panels/job_status.py:302
@@ -254,7 +254,7 @@ msgstr "Инвертировать Z"
 #: panels/system.py:22
 msgid "Klipper Restart"
 msgstr ""
-"Перезагрузка\n"
+"Рестарт\n"
 "Klipper"
 
 #: panels/system.py:42
@@ -486,8 +486,8 @@ msgid ""
 "System\n"
 "Restart"
 msgstr ""
-"Перегрузить\n"
-"Систему"
+"Рестарт\n"
+"Системы"
 
 #: panels/system.py:30
 msgid ""
@@ -526,7 +526,7 @@ msgstr "Y-"
 
 #: ks_includes/KlipperScreen.conf:125
 msgid "Z Calibrate"
-msgstr "Калибровка Z"
+msgstr "Калибр. Z"
 
 #: panels/zcalibrate.py:28
 msgid "Z Offset"
@@ -542,7 +542,7 @@ msgstr "Z-"
 
 #: ks_includes/config.py:60
 msgid "minutes"
-msgstr "минут"
+msgstr "мин."
 
 #: panels/fine_tune.py:38
 msgid "mm"
