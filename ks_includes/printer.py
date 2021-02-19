@@ -46,7 +46,7 @@ class Printer:
                 if "shared_heater" in self.config[x]:
                     continue
                 self.extrudercount += 1
-            if x.startswith('heater_bed'):
+            if x.startswith('heater_bed') or x.startswith('heater_generic '):
                 self.devices[x] = {
                     "temperature": 0,
                     "target": 0
@@ -85,19 +85,11 @@ class Printer:
                 for y in data[x]:
                     self.data[x][y] = data[x][y]
 
-        if "heater_bed" in data:
-            d = data["heater_bed"]
-            if "target" in d:
-                self.set_dev_stat("heater_bed", "target", d["target"])
-            if "temperature" in d:
-                self.set_dev_stat("heater_bed", "temperature", d["temperature"])
-        for x in self.get_tools():
+        for x in (self.get_tools() + self.get_heaters()):
             if x in data:
                 d = data[x]
-                if "target" in d:
-                    self.set_dev_stat(x, "target", d["target"])
-                if "temperature" in d:
-                    self.set_dev_stat(x, "temperature", d["temperature"])
+                for i in d:
+                    self.set_dev_stat(x, i, d[i])
 
         if "webhooks" in data or "idle_timeout" in data or "pause_resume" in data or "print_stats" in data:
             self.evaluate_state()
@@ -161,6 +153,14 @@ class Printer:
 
     def get_gcode_macros(self):
         return self.get_config_section_list("gcode_macro ")
+
+    def get_heaters(self):
+        heaters = []
+        if self.has_heated_bed():
+            heaters.append("heater_bed")
+        for h in self.get_config_section_list("heater_generic "):
+            heaters.append(h)
+        return heaters
 
     def get_printer_status_data(self):
         data = {
