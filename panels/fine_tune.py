@@ -17,7 +17,7 @@ class FineTunePanel(ScreenPanel):
 
     bs = 0
     bs_delta = "0.005"
-    bs_deltas = ["0.01","0.005"]
+    bs_deltas = ["0.005","0.01"]
     percent_delta = 1
     percent_deltas = ['1','5','10','25']
     fan = 100
