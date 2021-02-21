@@ -248,13 +248,13 @@ trough {
 }
 
 .printing-filename {
-    font-size: 1.75em;
+    font-size: 1em;
     font-weight: bold;
     margin: .25em .25em 0 0;
 }
 
 .printing-info {
-    font-size: 1.2em;
+    font-size: 1em;
     margin-left: .25em;
 }
 
@@ -277,7 +277,7 @@ trough {
 }
 
 .printing-progress-text {
-	font-size: 1.5em;
+	font-size: 1em;
     font-weight: bold;
 	color: #fff;
 }
@@ -286,7 +286,7 @@ trough {
 	padding-top: .25em;
 	padding-bottom: .15em;
     color: #ccc;
-	font-size: 1.25em;
+	font-size: 1em;
 }
 
 .tempbutton_top {
