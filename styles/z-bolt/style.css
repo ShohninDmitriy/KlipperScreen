@@ -21,12 +21,12 @@ scrollbar slider {
 
 progress, trough {
 	min-height: 20px;
-	font-size: 50px;
+	font-size: 25px;
 }
 
 progress {
 	background-color: #00C9B4;
-	font-size: 50px;
+	font-size: 25px;
 	font-weight: lighter;
 }
 
