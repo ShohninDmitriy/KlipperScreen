@@ -57,7 +57,7 @@ combobox box button {
 }
 
 entry {
-	font-size: 1.5em;
+	font-size: 1.8em;
 	background-color: #20292F;
     border: 0;
 	padding: .25em;
@@ -254,7 +254,7 @@ trough {
 }
 
 .printing-info {
-    font-size: 1.0em;  
+    font-size: 1.05em;  /*размер текста при печати*/
     margin-left: .25em;
 }
 
