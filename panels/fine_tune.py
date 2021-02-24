@@ -15,8 +15,8 @@ class FineTunePanel(ScreenPanel):
     user_selecting = False
 
     bs = 0
-    bs_delta = "0.005"
-    bs_deltas = ["0.005","0.01"]
+    bs_delta = ".005"
+    bs_deltas = [".005",".01"]
     percent_delta = 1
     percent_deltas = ['1','5','10','25']
     fan = 100
@@ -33,7 +33,7 @@ class FineTunePanel(ScreenPanel):
 
         print_cfg = self._config.get_printer_config(self._screen.connected_printer)
         if print_cfg is not None:
-            bs = print_cfg.get("z_babystep_values","0.005, 0.01")
+            bs = print_cfg.get("z_babystep_values",".005, .01")
             if re.match(r'^[0-9,\.\s]+$', bs):
                 bs = [str(i.strip()) for i in bs.split(',')]
                 if len(bs) <= 2:
