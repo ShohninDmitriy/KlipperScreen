@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-26 15:56+0000\n"
-"PO-Revision-Date: 2021-02-12 02:24+0100\n"
+"PO-Revision-Date: 2021-02-27 20:32+0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: Russian <kde-i18n-de@kde.org>\n"
 "Language: ru\n"
@@ -69,7 +69,7 @@ msgid "Cancelled"
 msgstr "Отменить"
 
 msgid "Channel"
-msgstr ""
+msgstr "Канал"
 
 msgid ""
 "Check /tmp/KlipperScreen.log for more information.\n"
@@ -82,17 +82,17 @@ msgid "Close"
 msgstr "Закрыть"
 
 msgid "Complete"
-msgstr ""
+msgstr "Завершен"
 
 msgid "Configuration"
 msgstr "Конфигурация"
 
 msgid "Connected"
-msgstr ""
+msgstr "Подключение"
 
 #, python-format
 msgid "Connecting to %s"
-msgstr ""
+msgstr "Подключен к %s"
 
 msgid "Continue"
 msgstr "Продолжить"
@@ -119,7 +119,7 @@ msgid "Disable XY"
 msgstr "Отключить XY"
 
 msgid "Disconnect"
-msgstr ""
+msgstr "Разъединен"
 
 msgid "Displayed Macros"
 msgstr "Показать  макросы"
@@ -137,7 +137,7 @@ msgid "Emergency Stop"
 msgstr "Аварийный стоп"
 
 msgid "Error"
-msgstr ""
+msgstr "Ошибка"
 
 msgid "Estimated Time Method"
 msgstr "Расчётное время"
@@ -202,10 +202,10 @@ msgid "Hostname"
 msgstr ""
 
 msgid "IPv4"
-msgstr ""
+msgstr "IPv4"
 
 msgid "IPv6"
-msgstr ""
+msgstr "IPv6"
 
 msgid "Increase"
 msgstr "Поднять"
@@ -217,7 +217,7 @@ msgid "Initializing printer..."
 msgstr "Принтер стартует..."
 
 msgid "Interface"
-msgstr ""
+msgstr "Интерфейс"
 
 msgid "Invert X"
 msgstr "Инвертировать X"
@@ -293,7 +293,7 @@ msgid "Menu"
 msgstr "Меню"
 
 msgid "Modified"
-msgstr ""
+msgstr "Изменён"
 
 msgid "Move"
 msgstr "Двигать"
@@ -368,10 +368,10 @@ msgid "Save configuration."
 msgstr "Настройки сохраняются."
 
 msgid "Screen Power Off Time"
-msgstr ""
+msgstr "Выключение экрана"
 
 msgid "Screen will show in less than one second"
-msgstr ""
+msgstr "Экран отобразится через одну секунду"
 
 msgid "Screws Adjust"
 msgstr "Настроить винты"
@@ -452,7 +452,7 @@ msgid "Z-"
 msgstr "Z-"
 
 msgid "dBm"
-msgstr ""
+msgstr "dBm"
 
 msgid "minutes"
 msgstr "мин."
