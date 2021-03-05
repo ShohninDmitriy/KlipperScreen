@@ -127,7 +127,8 @@ class MovePanel(ScreenPanel):
         dist = str(self.distance) if dir == "+" else "-" + str(self.distance)
         logging.info("# Moving " + axis + " " + dist + "mm")
 
-        print("%s\n%s %s%s\n%s" % (KlippyGcodes.MOVE_RELATIVE, KlippyGcodes.MOVE, axis, dist, KlippyGcodes.MOVE_ABSOLUTE))
+        print("%s\n%s %s%s" % (KlippyGcodes.MOVE_RELATIVE, KlippyGcodes.MOVE, axis, dist))
         self._screen._ws.klippy.gcode_script(
-            "%s\n%s %s%s\n%s" % (KlippyGcodes.MOVE_RELATIVE, KlippyGcodes.MOVE, axis, dist, KlippyGcodes.MOVE_ABSOLUTE)
+             "%s\n%s %s%s%s" % (KlippyGcodes.MOVE_RELATIVE, KlippyGcodes.MOVE, axis, dist,
+                "\nG90" if self._printer.get_stat("gcode_move", "absolute_coordinates") == True else "")
         )
