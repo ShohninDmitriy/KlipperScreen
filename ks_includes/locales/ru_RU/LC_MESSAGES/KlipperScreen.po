@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-26 15:56+0000\n"
-"PO-Revision-Date: 2021-02-28 00:12+0300\n"
+"POT-Creation-Date: 2021-03-06 18:14+0100\n"
+"PO-Revision-Date: 2021-03-06 22:09+0100\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: Russian <kde-i18n-de@kde.org>\n"
 "Language: ru\n"
@@ -30,6 +30,9 @@ msgstr "Применить"
 
 msgid "Actions"
 msgstr "Действия"
+
+msgid "Add Printer"
+msgstr "Добавить принтер"
 
 msgid "Add bed mesh profile"
 msgstr "Добавить профиль сетки стола"
@@ -64,9 +67,11 @@ msgstr "Отменить изменения"
 msgid "Cancel Print"
 msgstr "Отменить печать"
 
-#, fuzzy
 msgid "Cancelled"
-msgstr "Отменить"
+msgstr "Отменено"
+
+msgid "Change Printer"
+msgstr "Сменить принтер"
 
 msgid "Channel"
 msgstr "Канал"
@@ -82,17 +87,17 @@ msgid "Close"
 msgstr "Закрыть"
 
 msgid "Complete"
-msgstr "Завершен"
+msgstr "Готово"
 
 msgid "Configuration"
 msgstr "Конфигурация"
 
 msgid "Connected"
-msgstr "Подключение"
+msgstr "Соединенный"
 
 #, python-format
 msgid "Connecting to %s"
-msgstr "Подключен к %s"
+msgstr "Соединенный с  %s"
 
 msgid "Continue"
 msgstr "Продолжить"
@@ -119,7 +124,7 @@ msgid "Disable XY"
 msgstr "Отключить XY"
 
 msgid "Disconnect"
-msgstr "Разъединен"
+msgstr "Отключить"
 
 msgid "Displayed Macros"
 msgstr "Показать  макросы"
@@ -132,9 +137,6 @@ msgstr "Продолжительность печати"
 
 msgid "Elapsed:"
 msgstr "Прошло:"
-
-msgid "Emergency Stop"
-msgstr "Аварийный стоп"
 
 msgid "Error"
 msgstr "Ошибка"
@@ -179,6 +181,9 @@ msgstr ""
 
 msgid "Go Back"
 msgstr "Назад"
+
+msgid "Home"
+msgstr "Парковка"
 
 msgid "Home All"
 msgstr "Парковать все"
@@ -293,7 +298,7 @@ msgid "Menu"
 msgstr "Меню"
 
 msgid "Modified"
-msgstr "Изменён"
+msgstr "Изменено"
 
 msgid "Move"
 msgstr "Двигать"
@@ -337,6 +342,9 @@ msgstr "Управление печатью"
 msgid "Print Time"
 msgstr "Время печати"
 
+msgid "Printer Connections"
+msgstr "Подключение принтера"
+
 msgid "Printing"
 msgstr "Печатается"
 
@@ -368,7 +376,7 @@ msgid "Save configuration."
 msgstr "Настройки сохраняются."
 
 msgid "Screen Power Off Time"
-msgstr "Выключение экрана"
+msgstr "Время выключения экрана"
 
 msgid "Screen will show in less than one second"
 msgstr "Экран отобразится через одну секунду"
@@ -442,8 +450,8 @@ msgstr "Калибр. Z"
 msgid "Z Offset"
 msgstr "Офсет Z"
 
-msgid "Z Tilt Adjust"
-msgstr ""
+msgid "Z Tilt"
+msgstr "Z Наклон"
 
 msgid "Z+"
 msgstr "Z+"
