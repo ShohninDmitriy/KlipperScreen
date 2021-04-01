@@ -167,9 +167,9 @@ class JobStatusPanel(ScreenPanel):
         fan_box.add(self.labels['fan'])
         sfe_grid = self._gtk.HomogeneousGrid()
         sfe_grid.set_hexpand(True)
-        sfe_grid.attach(speed_box, 0, 0, 1, 1)
-        sfe_grid.attach(extrusion_box, 1, 0, 1, 1)
-        sfe_grid.attach(fan_box, 2, 0, 1, 1)
+        sfe_grid.attach(self.labels['speed'], 0, 0, 1, 1)
+        sfe_grid.attach(self.labels['extrusion'], 1, 0, 1, 1)
+        sfe_grid.attach(self.labels['fan'], 2, 0, 1, 1)
         self.labels['sfe_grid'] = sfe_grid
 
         self.labels['i1_box'] = Gtk.HBox(spacing=0)
