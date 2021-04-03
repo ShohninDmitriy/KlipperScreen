@@ -225,13 +225,13 @@ msgid "Interface"
 msgstr "Интерфейс"
 
 msgid "Invert X"
-msgstr "Инвертировать X"
+msgstr "Инверсия X"
 
 msgid "Invert Y"
-msgstr "Инвертировать Y"
+msgstr "Инверсия Y"
 
 msgid "Invert Z"
-msgstr "Инвертировать Z"
+msgstr "Инверсия Z"
 
 msgid "Klipper Restart"
 msgstr ""
@@ -364,7 +364,7 @@ msgid "Resume"
 msgstr "Продолжить"
 
 msgid "Retract"
-msgstr "Выгрузить"
+msgstr "Втянуть"
 
 msgid "Save"
 msgstr "Сохранить"
