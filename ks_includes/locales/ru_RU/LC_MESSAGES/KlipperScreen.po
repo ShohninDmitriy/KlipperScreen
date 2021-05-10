@@ -31,9 +31,6 @@ msgstr "Применить"
 msgid "Actions"
 msgstr "Действия"
 
-msgid "Add Printer"
-msgstr "Добавить принтер"
-
 msgid "Add bed mesh profile"
 msgstr "Добавить профиль сетки стола"
 
@@ -69,9 +66,6 @@ msgstr "Отменить печать"
 
 msgid "Cancelled"
 msgstr "Отменено"
-
-msgid "Change Printer"
-msgstr "Сменить принтер"
 
 msgid "Channel"
 msgstr "Канал"
@@ -138,6 +132,9 @@ msgstr "Продолжительность печати"
 msgid "Elapsed:"
 msgstr "Прошло:"
 
+msgid "Emergency Stop"
+msgstr "Аварийный СТОП"
+
 msgid "Error"
 msgstr "Ошибка"
 
@@ -181,9 +178,6 @@ msgstr ""
 
 msgid "Go Back"
 msgstr "Назад"
-
-msgid "Home"
-msgstr "Парковка"
 
 msgid "Home All"
 msgstr "Парковать все"
@@ -342,9 +336,6 @@ msgstr "Управление печатью"
 msgid "Print Time"
 msgstr "Время печати"
 
-msgid "Printer Connections"
-msgstr "Подключение принтера"
-
 msgid "Printing"
 msgstr "Печатается"
 
@@ -467,12 +458,3 @@ msgstr "мин."
 
 msgid "mm"
 msgstr "мм"
-
-#~ msgid "Network Info"
-#~ msgstr "Информация о сети"
-
-#~ msgid "Screen Blanking Time"
-#~ msgstr "Скрыть экран через"
-
-#~ msgid "Klipper"
-#~ msgstr "Klipper"
