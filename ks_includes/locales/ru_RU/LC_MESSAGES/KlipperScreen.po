@@ -67,6 +67,9 @@ msgstr "Отменить печать"
 msgid "Cancelled"
 msgstr "Отменено"
 
+msgid "Change Printer"
+msgstr "Сменить принтер"
+
 msgid "Channel"
 msgstr "Канал"
 
@@ -335,6 +338,9 @@ msgstr "Управление печатью"
 
 msgid "Print Time"
 msgstr "Время печати"
+
+msgid "Printer Connections"
+msgstr "Подключение принтера"
 
 msgid "Printing"
 msgstr "Печатается"
