@@ -254,7 +254,7 @@ trough {
 }
 
 .printing-info {
-    font-size: .5em;  /*размер текста при печати*/
+    font-size: 1.05em;  /*размер текста при печати*/
     margin-left: .25em;
 }
 
