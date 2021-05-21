@@ -50,9 +50,14 @@ class JobStatusPanel(ScreenPanel):
         self.labels['status'].set_halign(Gtk.Align.START)
         self.labels['status'].set_vexpand(False)
         self.labels['status'].get_style_context().add_class("printing-status")
+        self.labels['lcdmessage'] = Gtk.Label("")
+        self.labels['lcdmessage'].set_halign(Gtk.Align.START)
+        self.labels['lcdmessage'].set_vexpand(False)
+        self.labels['lcdmessage'].get_style_context().add_class("printing-status")
 
         fi_box.add(self.labels['file']) #, True, True, 0)
         fi_box.add(self.labels['status']) #, True, True, 0)
+        fi_box.add(self.labels['lcdmessage']) #, True, True, 0)
         fi_box.set_valign(Gtk.Align.CENTER)
 
         info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -147,7 +152,7 @@ class JobStatusPanel(ScreenPanel):
         pos_box.add(posgrid)
         self.labels['pos_box'] = pos_box
 
-        speed = self._gtk.Image("speed-step.svg", None, .6, .6)
+        speed = self._gtk.Image("speed+.svg", None, .6, .6)
         self.labels['speed'] = Gtk.Label(label="")
         self.labels['speed'].get_style_context().add_class("printing-info")
         speed_box = Gtk.Box(spacing=0)
@@ -254,7 +259,7 @@ class JobStatusPanel(ScreenPanel):
         _ = self.lang.gettext
         self.labels['cancel'] = self._gtk.ButtonImage("stop",_("Cancel"),"color2")
         self.labels['cancel'].connect("clicked", self.cancel)
-        self.labels['control'] = self._gtk.ButtonImage("control",_("Control"),"color3")
+        self.labels['control'] = self._gtk.ButtonImage("settings",_("Settings"),"color3")
         self.labels['control'].connect("clicked", self._screen._go_to_submenu, "")
         self.labels['fine_tune'] = self._gtk.ButtonImage("fine-tune",_("Fine Tuning"),"color4")
         self.labels['fine_tune'].connect("clicked", self.menu_item_clicked, "fine_tune",{
@@ -263,7 +268,7 @@ class JobStatusPanel(ScreenPanel):
         self.labels['menu'].connect("clicked", self.close_panel)
         self.labels['pause'] = self._gtk.ButtonImage("pause",_("Pause"),"color1" )
         self.labels['pause'].connect("clicked",self.pause)
-        self.labels['restart'] = self._gtk.ButtonImage("restart",_("Restart"),"color3")
+        self.labels['restart'] = self._gtk.ButtonImage("refresh",_("Restart"),"color3")
         self.labels['restart'].connect("clicked", self.restart)
         self.labels['resume'] = self._gtk.ButtonImage("resume",_("Resume"),"color1")
         self.labels['resume'].connect("clicked",self.resume)
@@ -344,7 +349,7 @@ class JobStatusPanel(ScreenPanel):
             self._files.remove_file_callback(self._callback_metadata)
 
     def new_print(self):
-        if self.state in ["cancelled","complete","error"]:
+        if self.state in ["cancelled","cancelling","complete","error"]:
             for to in self.close_timeouts:
                 GLib.source_remove(to)
                 self.close_timeouts.remove(to)
@@ -376,6 +381,8 @@ class JobStatusPanel(ScreenPanel):
 
         ps = self._printer.get_stat("print_stats")
         vsd = self._printer.get_stat("virtual_sdcard")
+        if 'display_status' in data and 'message' in data['display_status']:
+                self.update_message()
 
         if "print_stats" in data and "filename" in data['print_stats']:
             if data['print_stats']['filename'] != self.filename and self.state not in  ["cancelling","cancelled","complete"]:
@@ -514,16 +521,18 @@ class JobStatusPanel(ScreenPanel):
             self.labels['button_grid'].attach(self.labels['cancel'], 1, 0, 1, 1)
             self.labels['button_grid'].attach(self.labels['fine_tune'], 2, 0, 1, 1)
             self.labels['button_grid'].attach(self.labels['control'], 3, 0, 1, 1)
+            self.enable_button("pause","cancel")
         elif self.state == "paused":
             self.labels['button_grid'].attach(self.labels['resume'], 0, 0, 1, 1)
             self.labels['button_grid'].attach(self.labels['cancel'], 1, 0, 1, 1)
             self.labels['button_grid'].attach(self.labels['fine_tune'], 2, 0, 1, 1)
             self.labels['button_grid'].attach(self.labels['control'], 3, 0, 1, 1)
+            self.enable_button("resume","cancel")
         elif self.state == "cancelling":
             self.labels['button_grid'].attach(Gtk.Label(""), 0, 0, 1, 1)
             self.labels['button_grid'].attach(Gtk.Label(""), 1, 0, 1, 1)
-            self.labels['button_grid'].attach(self.labels['fine_tune'], 2, 0, 1, 1)
-            self.labels['button_grid'].attach(self.labels['control'], 3, 0, 1, 1)
+            self.labels['button_grid'].attach(self.labels['restart'], 2, 0, 1, 1)
+            self.labels['button_grid'].attach(self.labels['menu'], 3, 0, 1, 1)
         elif self.state == "error" or self.state == "complete" or self.state == "cancelled":
             self.labels['button_grid'].attach(Gtk.Label(""), 0, 0, 1, 1)
             self.labels['button_grid'].attach(Gtk.Label(""), 1, 0, 1, 1)
@@ -546,7 +555,7 @@ class JobStatusPanel(ScreenPanel):
     def update_file_metadata(self):
         if self._files.file_metadata_exists(self.filename):
             self.file_metadata = self._files.get_file_info(self.filename)
-            logging.debug("Parsing file metadata: %s" % list(self.file_metadata))
+            logging.info("Update Metadata. File: %s Size: %s" % (self.filename, self.file_metadata['size']))
             if "estimated_time" in self.file_metadata and self.timeleft_type == "slicer":
                 self.update_text("est_time","/ %s" %
                     str(self._gtk.formatTimeString(self.file_metadata['estimated_time'])))
@@ -554,7 +563,6 @@ class JobStatusPanel(ScreenPanel):
                 tmp = self.file_metadata['thumbnails'].copy()
                 for i in tmp:
                     i['data'] = ""
-                logging.debug("Thumbnails: %s" % list(tmp))
             self.show_file_thumbnail()
         else:
             self.file_metadata = {}
@@ -588,6 +596,10 @@ class JobStatusPanel(ScreenPanel):
 
     def update_progress (self):
         self.labels['progress_text'].set_text("%s%%" % (str( min(int(self.progress*100),100) )))
+
+    def update_message (self):
+        msg = self._printer.get_stat("display_status", "message")
+        self.labels['lcdmessage'].set_text("" if msg == None else msg)
 
     #def update_temp(self, dev, temp, target):
     #    if dev in self.labels:

@@ -22,7 +22,7 @@ class SplashScreenPanel(ScreenPanel):
     def initialize(self, panel_name):
         _ = self.lang.gettext
 
-        image = self._gtk.Image("klipper.png", None, 4, 3)
+        image = self._gtk.Image("klipper.svg", None, 4, 3)
 
         self.labels['text'] = Gtk.Label(_("Initializing printer..."))
         self.labels['text'].set_line_wrap(True)
@@ -42,12 +42,8 @@ class SplashScreenPanel(ScreenPanel):
         main.pack_end(self.labels['actions'], False, False, 10)
         main.pack_end(self.labels['text'], True, True, 10)
 
-
-        box = Gtk.VBox()
-        box.add(main)
-        box.set_size_request(self._screen.width, self._screen.height)
-
-        self.layout.put(box, 0, 0)
+        self.content.add(main)
+        #self.layout.put(box, 0, 0)
 
     def update_text(self, text):
         self.labels['text'].set_text(text)
@@ -63,12 +59,12 @@ class SplashScreenPanel(ScreenPanel):
         if "firmware_restart" not in self.labels:
             self.labels['printer_select'] = self._gtk.ButtonImage("shuffle",_("Change Printer"))
             self.labels['printer_select'].connect("clicked", self._screen.show_printer_select)
-            self.labels['menu'] = self._gtk.ButtonImage("control",_("Menu"),"color4")
+            self.labels['menu'] = self._gtk.ButtonImage("settings",_("Menu"),"color4")
             self.labels['menu'].connect("clicked", self._screen._go_to_submenu, "")
             self.labels['power'] = self._gtk.ButtonImage("shutdown",_("Power On Printer"),"color3")
-            self.labels['restart'] = self._gtk.ButtonImage("reboot",_("Restart"),"color1")
+            self.labels['restart'] = self._gtk.ButtonImage("refresh",_("Restart"),"color1")
             self.labels['restart'].connect("clicked", self.restart)
-            self.labels['firmware_restart'] = self._gtk.ButtonImage("restart",_("Firmware Restart"),"color2")
+            self.labels['firmware_restart'] = self._gtk.ButtonImage("refresh",_("Firmware Restart"),"color2")
             self.labels['firmware_restart'].connect("clicked", self.firmware_restart)
 
         self.clear_action_bar()

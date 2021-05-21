@@ -67,19 +67,17 @@ class SettingsPanel(ScreenPanel):
             }
             self.add_option("printers", self.printers, pname, self.printers[pname])
 
-        self.control['back'].disconnect_by_func(self._screen._menu_go_back)
-        self.control['back'].connect("clicked", self.back)
         self.content.add(self.labels['main_box'])
 
     def activate(self):
         while len(self.menu) > 1:
             self.unload_menu()
 
-    def back(self, widget):
+    def back(self):
         if len(self.menu) > 1:
             self.unload_menu()
-        else:
-            self._screen._menu_go_back()
+            return True
+        return False
 
     def create_box(self, name, insert=None):
         # Create a scroll window for the macros
@@ -116,7 +114,7 @@ class SettingsPanel(ScreenPanel):
         name.set_line_wrap(True)
         name.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
 
-        #open = self._gtk.ButtonImage("open",None,"color3")
+        #open = self._gtk.ButtonImage("resume",None,"color3")
         #open.connect("clicked", self.run_gcode_macro, macro)
         #open.set_hexpand(False)
         #open.set_halign(Gtk.Align.END)
@@ -177,7 +175,7 @@ class SettingsPanel(ScreenPanel):
             box.add(label)
             dev.add(box)
         elif option['type'] == "menu":
-            open = self._gtk.ButtonImage("open",None,"color3")
+            open = self._gtk.ButtonImage("settings",None,"color3")
             open.connect("clicked", self.load_menu, option['menu'])
             open.set_hexpand(False)
             open.set_halign(Gtk.Align.END)
