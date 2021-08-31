@@ -427,7 +427,8 @@ class KlipperScreen(Gtk.Window):
         css = open(klipperscreendir + "/styles/%s/style.css" % (self.theme))
         css_data = css.read()
         css.close()
-        css_data = css_data.replace("KS_FONT_SIZE",str(self.gtk.get_font_size()))
+        self.font_size = self.gtk.get_font_size()
+        css_data = css_data.replace("KS_FONT_SIZE",str(self.font_size))
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css_data.encode())
@@ -793,8 +794,11 @@ class KlipperScreen(Gtk.Window):
             return
 
         env = os.environ.copy()
-        env["MB_KBD_CONFIG"] = "/home/pi/.matchbox/keyboard.xml"
-        env["MB_KBD_CONFIG"] = "ks_includes/locales/keyboard.xml"
+        usrkbd = "/home/pi/.matchbox/keyboard.xml"
+        if os.path.isfile(usrkbd):
+            env["MB_KBD_CONFIG"] = usrkbd
+        else:
+            env["MB_KBD_CONFIG"] = "ks_includes/locales/keyboard.xml"
         p = subprocess.Popen(["matchbox-keyboard", "--xid"], stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, env=env)
 
