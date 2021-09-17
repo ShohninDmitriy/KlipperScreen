@@ -254,7 +254,8 @@ class KlipperScreen(Gtk.Window):
                 "idle_timeout": ["state"],
                 "pause_resume": ["is_paused"],
                 "print_stats": ["print_duration", "total_duration", "filament_used", "filename", "state", "message"],
-                "toolhead": ["homed_axes", "estimated_print_time", "print_time", "position", "extruder"],
+                "toolhead": ["homed_axes", "estimated_print_time", "print_time", "position", "extruder",
+                             "max_accel", "max_accel_to_decel", "max_velocity", "square_corner_velocity"],
                 "virtual_sdcard": ["file_position", "is_active", "progress"],
                 "webhooks": ["state", "state_message"]
             }
@@ -329,6 +330,7 @@ class KlipperScreen(Gtk.Window):
 
             if hasattr(self.panels[panel_name], "process_update"):
                 self.panels[panel_name].process_update("notify_status_update", self.printer.get_updates())
+                self.add_subscription(panel_name)
             if hasattr(self.panels[panel_name], "activate"):
                 self.panels[panel_name].activate()
                 self.show_all()
@@ -431,9 +433,11 @@ class KlipperScreen(Gtk.Window):
     def init_style(self):
         style_provider = Gtk.CssProvider()
 
-
+        css = open(klipperscreendir + "/styles/base.css")
+        css_base_data = css.read()
+        css.close()
         css = open(klipperscreendir + "/styles/%s/style.css" % (self.theme))
-        css_data = css.read()
+        css_data = css_base_data + css.read()
         css.close()
 
         self.font_size = self.gtk.get_font_size()
@@ -496,6 +500,7 @@ class KlipperScreen(Gtk.Window):
     def _remove_current_panel(self, pop=True, show=True):
         if len(self._cur_panels) > 0:
             self.base_panel.remove(self.panels[self._cur_panels[-1]].get_content())
+            self.remove_subscription(self._cur_panels[-1])
             if pop is True:
                 self._cur_panels.pop()
                 if len(self._cur_panels) > 0:
@@ -504,6 +509,7 @@ class KlipperScreen(Gtk.Window):
                     if hasattr(self.panels[self._cur_panels[-1]], "process_update"):
                         self.panels[self._cur_panels[-1]].process_update("notify_status_update",
                                                                          self.printer.get_updates())
+                        self.add_subscription(self._cur_panels[-1])
                     if show is True:
                         self.show_all()
 
