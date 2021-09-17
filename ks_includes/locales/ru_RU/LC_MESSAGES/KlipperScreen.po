@@ -34,6 +34,9 @@ msgstr "Применить"
 msgid "Actions"
 msgstr "Действия"
 
+msgid "Add Printer"
+msgstr "Добавить принтер"
+
 msgid "Add bed mesh profile"
 msgstr "Добавить профиль сетки стола"
 
@@ -139,9 +142,6 @@ msgstr "Продолжительность печати"
 msgid "Elapsed:"
 msgstr "Прошло:"
 
-msgid "Emergency Stop"
-msgstr "Аварийный СТОП"
-
 msgid "Error"
 msgstr "Ошибка"
 
@@ -188,6 +188,9 @@ msgstr ""
 
 msgid "Go Back"
 msgstr "Назад"
+
+msgid "Home"
+msgstr "Парковка"
 
 msgid "Home All"
 msgstr "Парковать все"
