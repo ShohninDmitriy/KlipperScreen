@@ -67,7 +67,6 @@ msgstr "Отменить печать"
 msgid "Cancelled"
 msgstr "Отменено"
 
-#, fuzzy
 msgid "Cancelling"
 msgstr "Отменить"
 
@@ -88,10 +87,10 @@ msgid "Close"
 msgstr "Закрыть"
 
 msgid "Colorized"
-msgstr ""
+msgstr "Цветная"
 
 msgid "Commited"
-msgstr ""
+msgstr "Зафиксировано"
 
 msgid "Complete"
 msgstr "Готово"
@@ -107,7 +106,7 @@ msgid "Connecting to %s"
 msgstr "Соединенный с  %s"
 
 msgid "Console"
-msgstr ""
+msgstr "Консоль"
 
 msgid "Continue"
 msgstr "Продолжить"
@@ -180,9 +179,8 @@ msgstr ""
 "Рестарт\n"
 "прошивки"
 
-#, fuzzy
 msgid "Font Size"
-msgstr "Размер"
+msgstr "Размер шрифта"
 
 msgid "Go Back"
 msgstr "Назад"
@@ -285,13 +283,13 @@ msgid "Language"
 msgstr "Язык"
 
 msgid "Large"
-msgstr ""
+msgstr "Большой"
 
 msgid "Left:"
 msgstr "Осталось:"
 
 msgid "Limits"
-msgstr ""
+msgstr "Лимиты"
 
 msgid "Load"
 msgstr "Загрузить"
@@ -300,7 +298,7 @@ msgid "Lower Nozzle"
 msgstr "Опустить сопло"
 
 msgid "Macro shortcut on sidebar"
-msgstr ""
+msgstr "Показать макросы в панели"
 
 msgid "Macros"
 msgstr "Макросы"
@@ -309,17 +307,16 @@ msgid "Main Menu"
 msgstr "Главное меню"
 
 msgid "Max Accelation"
-msgstr ""
+msgstr "Ускорения"
 
 msgid "Max Acceleration to Deceleration"
-msgstr ""
+msgstr "Ускорения торможения"
 
 msgid "Max Velocity"
-msgstr ""
+msgstr "Скорость"
 
-#, fuzzy
 msgid "Medium (default)"
-msgstr "По файлу (по умолчанию)"
+msgstr "Средний (по умолчанию)"
 
 msgid "Menu"
 msgstr "Меню"
@@ -333,9 +330,8 @@ msgstr "Двигать"
 msgid "Move Distance (mm)"
 msgstr "Дистанция перемещения (мм)"
 
-#, fuzzy
 msgid "Move Speed (mm/s)"
-msgstr "Дистанция перемещения (mm)"
+msgstr "Скорость перемещения (мм/с)"
 
 msgid "Name"
 msgstr "Имя"
@@ -350,7 +346,7 @@ msgid "Off"
 msgstr "Выкл"
 
 msgid "PSK for"
-msgstr ""
+msgstr "PSK для"
 
 msgid "Pause"
 msgstr "Пауза"
@@ -428,14 +424,13 @@ msgid "Slicer"
 msgstr "Слайсер"
 
 msgid "Small"
-msgstr ""
+msgstr "Маленький"
 
 msgid "Sort by: "
 msgstr "Сортировать по: "
 
-#, fuzzy
 msgid "Speed (mm/s)"
-msgstr "Дистанция перемещения (mm)"
+msgstr "Скорость (мм/с)"
 
 msgid "Speed +"
 msgstr "Скорость +"
@@ -444,7 +439,7 @@ msgid "Speed -"
 msgstr "Скорость -"
 
 msgid "Square Corner Velocity"
-msgstr ""
+msgstr "Квадратная угловая скорость"
 
 msgid "Starting WiFi Re-association"
 msgstr "WiFi реконенект"
@@ -472,12 +467,11 @@ msgstr "Tемпература"
 
 #, python-format
 msgid "To apply %s KlipperScreen needs to be restarted"
-msgstr ""
+msgstr "Чтобы применить %s необходимо перезапустить KlipperScreen"
 
 msgid "Tool"
 msgstr "Инструмент"
 
-#, fuzzy
 msgid "Unload"
 msgstr "Загружено"
 
@@ -490,9 +484,8 @@ msgstr "Обновить"
 msgid "Uploaded"
 msgstr "Загружено"
 
-#, fuzzy
 msgid "View Mesh"
-msgstr "Сетка стола"
+msgstr "Смотреть сетку "
 
 msgid "X+"
 msgstr "X+"
@@ -534,10 +527,10 @@ msgid "mm"
 msgstr "мм"
 
 msgid "mm/s"
-msgstr ""
+msgstr "мм/с"
 
 msgid "mm/s^2"
-msgstr ""
+msgstr "мм/с^2"
 
 #~ msgid "Fan Off"
 #~ msgstr "Bыключить"
