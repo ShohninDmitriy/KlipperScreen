@@ -123,7 +123,8 @@ class KlipperScreen(Gtk.Window):
 
         self.theme = self._config.get_main_config_option('theme')
         self.gtk = KlippyGtk(self, self.width, self.height, self.theme,
-                             self._config.get_main_config().getboolean("show_cursor", fallback=False))
+                             self._config.get_main_config().getboolean("show_cursor", fallback=False),
+                             self._config.get_main_config_option("font_size", "medium"))
         self.keyboard_height = self.gtk.get_keyboard_height()
         self.init_style()
 
@@ -165,6 +166,9 @@ class KlipperScreen(Gtk.Window):
             while len(self.printer_select_callbacks) > 0:
                 i = self.printer_select_callbacks.pop(0)
                 i()
+            if self.printer.get_state() not in ["disconnected", "error", "startup", "shutdown"]:
+                self.base_panel.show_heaters(True)
+            self.base_panel.show_printer_select(True)
             self.base_panel.show_macro_shortcut(self._config.get_main_config_option('side_macro_shortcut'))
             return
 
@@ -209,6 +213,7 @@ class KlipperScreen(Gtk.Window):
             self.subscriptions = []
         for panel in panels:
             del self.panels[panel]
+        self.base_panel.show_printer_select(True)
         self.printer_initializing(_("Connecting to %s") % name)
 
         self.printer.set_callbacks({
@@ -440,14 +445,7 @@ class KlipperScreen(Gtk.Window):
         css_data = css_base_data + css.read()
         css.close()
 
-        self.font_size = self.gtk.get_font_size()
-        fontsize_type = self._config.get_main_config_option("font_size", "medium")
-        if fontsize_type != "medium":
-            if fontsize_type == "small":
-                self.font_size = round(self.font_size * 0.91)
-            elif (fontsize_type == "large"):
-                self.font_size = round(self.font_size * 1.09)
-        css_data = css_data.replace("KS_FONT_SIZE", str(self.font_size))
+        css_data = css_data.replace("KS_FONT_SIZE", str(self.gtk.get_font_size()))
 
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css_data.encode())
@@ -593,8 +591,11 @@ class KlipperScreen(Gtk.Window):
     def show_printer_select(self, widget=None):
         logging.debug("Saving panel: %s" % self._cur_panels[0])
         self.printer_select_prepanel = self._cur_panels[0]
-        self.show_panel("printer_select", "printer_select", "Printer Select", 2)
+        self.base_panel.show_heaters(False)
         self.base_panel.show_macro_shortcut(False)
+        self.base_panel.show_printer_select(False)
+        self.show_panel("printer_select", "printer_select", "Printer Select", 2)
+        self.show_all()
 
     def state_execute(self, callback, prev_state):
         if self.is_updating():
