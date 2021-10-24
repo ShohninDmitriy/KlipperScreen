@@ -126,8 +126,8 @@ class LimitsPanel(ScreenPanel):
 
         if opt == "max_accel":
             self._screen._ws.klippy.gcode_script("SET_VELOCITY_LIMIT ACCEL=%s" % (value))
-        elif opt == "max_accel_to_decel":
-            self._screen._ws.klippy.gcode_script("SET_VELOCITY_LIMIT ACCEL_TO_DECEL=%s" % (value))
+        #elif opt == "max_accel_to_decel":
+            self._screen._ws.klippy.gcode_script("SET_VELOCITY_LIMIT ACCEL_TO_DECEL=%s" % ((value) * 5 / 8))
         elif opt == "max_velocity":
             self._screen._ws.klippy.gcode_script("SET_VELOCITY_LIMIT VELOCITY=%s" % (value))
         elif opt == "square_corner_velocity":
