@@ -29,7 +29,7 @@ configuration:
 [update_manager KlipperScreen]
 type: git_repo
 path: ~/KlipperScreen
-origin: https://github.com/jordanruthe/KlipperScreen.git
+origin: https://github.com/ShohninDmitriy/KlipperScreen.git
 env: ~/.KlipperScreen-env/bin/python
 requirements: scripts/KlipperScreen-requirements.txt
 install_script: scripts/KlipperScreen-install.sh
@@ -39,7 +39,7 @@ install_script: scripts/KlipperScreen-install.sh
 Execute the following commands:
 ```
 cd ~/
-git clone https://github.com/jordanruthe/KlipperScreen.git
+git clone https://github.com/ShohninDmitriy/KlipperScreen.git
 cd ~/KlipperScreen
 ./scripts/KlipperScreen-install.sh
 ```
