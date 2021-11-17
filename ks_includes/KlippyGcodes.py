@@ -4,6 +4,9 @@ class KlippyGcodes:
     HOME_X = "G28 X"
     HOME_Y = "G28 Y"
     HOME_Z = "G28 Z"
+    HOME_XY = "G28 X Y"
+    Z_TILT = "Z_TILT_ADJUST"
+    QUAD_GANTRY_LEVEL = "QUAD_GANTRY_LEVEL"
 
     MOVE = "G1"
     MOVE_ABSOLUTE = "G90"
@@ -43,6 +46,10 @@ class KlippyGcodes:
     @staticmethod
     def set_heater_temp(heater, temp):
         return 'SET_HEATER_TEMPERATURE heater="%s" target=%s' % (heater, str(temp))
+
+    @staticmethod
+    def set_temp_fan_temp(temp_fan, temp):
+        return 'SET_TEMPERATURE_FAN_TARGET temperature_fan="%s" target=%s' % (temp_fan, str(temp))
 
     @staticmethod
     def set_fan_speed(speed):
