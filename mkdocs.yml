@@ -9,6 +9,6 @@ nav:
     - panels.md
     - Contact.md
 theme: readthedocs
-repo_url: https://github.com/jordanruthe/KlipperScreen/
+repo_url: https://github.com/ShohninDmitriy/KlipperScreen/
 plugins:
     - search
