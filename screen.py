@@ -62,6 +62,7 @@ class KlipperScreen(Gtk.Window):
     _cur_panels = []
     bed_temp_label = None
     connecting = False
+    connecting_to_printer = None
     connected_printer = None
     currentPanel = None
     files = None
@@ -159,7 +160,7 @@ class KlipperScreen(Gtk.Window):
 
     def connect_printer(self, name):
         _ = self.lang.gettext
-
+        self.connecting_to_printer = name
         if self.connected_printer == name:
             if self.printer_select_prepanel is not None:
                 self.show_panel(self.printer_select_prepanel, "", "", 2)
@@ -227,12 +228,6 @@ class KlipperScreen(Gtk.Window):
             "shutdown": self.state_shutdown
         })
 
-        powerdevs = self.apiclient.send_request("machine/device_power/devices")
-        logging.debug("Found power devices: %s" % powerdevs)
-        if powerdevs is not False:
-            self.printer.configure_power_devices(powerdevs['result'])
-            self.panels['splash_screen'].show_restart_buttons()
-
         self._ws = KlippyWebsocket(self,
                                    {
                                        "on_connect": self.init_printer,
@@ -242,6 +237,12 @@ class KlipperScreen(Gtk.Window):
                                    data["moonraker_host"],
                                    data["moonraker_port"]
                                    )
+
+        powerdevs = self.apiclient.send_request("machine/device_power/devices")
+        if powerdevs is not False:
+            self.printer.configure_power_devices(powerdevs['result'])
+            self.panels['splash_screen'].show_restart_buttons()
+
         self.files = KlippyFiles(self)
         self._ws.initial_connect()
         self.connecting = False
@@ -898,6 +899,7 @@ class KlipperScreen(Gtk.Window):
 
         if powerdevs is not False:
             self.printer.configure_power_devices(powerdevs['result'])
+            self.panels['splash_screen'].show_restart_buttons()
 
     def printer_ready(self):
         _ = self.lang.gettext
