@@ -4,7 +4,6 @@ import argparse
 import gi
 
 import json
-import netifaces
 import importlib
 import logging
 import os
@@ -24,11 +23,11 @@ from ks_includes.KlippyRest import KlippyRest
 from ks_includes.files import KlippyFiles
 from ks_includes.KlippyGtk import KlippyGtk
 from ks_includes.printer import Printer
-from ks_includes.wifi import WifiManager
 
 from ks_includes.config import KlipperScreenConfig
 from panels.base_panel import BasePanel
 
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 # This is here to avoid performance issues opening bed_mesh
 import matplotlib.pyplot  # noqa
@@ -87,13 +86,6 @@ class KlipperScreen(Gtk.Window):
 
         self._config = KlipperScreenConfig(configfile, self)
         self.lang = self._config.get_lang()
-
-        self.network_interfaces = netifaces.interfaces()
-        self.wireless_interfaces = [int for int in self.network_interfaces if int.startswith('w')]
-        self.wifi = None
-        if len(self.wireless_interfaces) > 0:
-            logging.info("Found wireless interfaces: %s" % self.wireless_interfaces)
-            self.wifi = WifiManager(self.wireless_interfaces[0])
 
         logging.debug("OS Language: %s" % os.getenv('LANG'))
 
@@ -174,11 +166,15 @@ class KlipperScreen(Gtk.Window):
             self.base_panel.show_macro_shortcut(self._config.get_main_config_option('side_macro_shortcut'))
             return
 
+        # Cleanup
         self.printer_select_callbacks = []
         self.printer_select_prepanel = None
-
         if self.files is not None:
+            self.files.reset()
             self.files = None
+        if self.printer is not None:
+            self.printer.reset()
+            self.printer = None
 
         for printer in self._config.get_printers():
             pname = list(printer)[0]
