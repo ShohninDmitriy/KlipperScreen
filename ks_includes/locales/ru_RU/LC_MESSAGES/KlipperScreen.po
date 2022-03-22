@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-03-20 10:15-0300\n"
-"PO-Revision-Date: 2022-02-26 15:33-0300\n"
+"PO-Revision-Date: 2022-03-22 19:07+0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: \n"
 "Language: ru_RU\n"
@@ -31,6 +31,7 @@ msgstr "24-часовой формат"
 
 msgid "A FIRMWARE_RESTART may fix the issue."
 msgstr ""
+"Выполните перезагрузку прошивки, чтобы попытаться исправить проблему."
 
 msgid "Abort"
 msgstr "Отменить"
@@ -60,10 +61,10 @@ msgid "Are you sure you wish to shutdown the system?"
 msgstr "Вы хотите выключить принтер?"
 
 msgid "Auto"
-msgstr ""
+msgstr "Авто"
 
 msgid "Auto-scroll"
-msgstr ""
+msgstr "Автоматическая прокрутка"
 
 msgid "Bed Level"
 msgstr "Уровень стола"
@@ -96,7 +97,7 @@ msgid "Cancelling"
 msgstr "Отменить"
 
 msgid "Cannot connect to Moonraker"
-msgstr ""
+msgstr "Не удается подключиться к Moonraker"
 
 msgid "Channel"
 msgstr "Канал"
@@ -340,7 +341,7 @@ msgid "Modified"
 msgstr "Изменено"
 
 msgid "Moonraker: connected"
-msgstr ""
+msgstr "Moonraker: подключен"
 
 msgid "Move"
 msgstr "Двигать"
@@ -374,7 +375,7 @@ msgstr[1] "Пакеты будут обновлены "
 msgstr[2] "Пакеты будут обновлены "
 
 msgid "Password saved"
-msgstr ""
+msgstr "Пароль сохранен"
 
 msgid "Pause"
 msgstr "Пауза"
@@ -383,7 +384,7 @@ msgid "Paused"
 msgstr "Приостановлено"
 
 msgid "Please recompile and flash the micro-controller."
-msgstr ""
+msgstr "Прошейте заново микроконтроллер."
 
 msgid "Power"
 msgstr "Включено"
@@ -438,7 +439,7 @@ msgstr "Втянуть"
 
 #, python-format
 msgid "Retry #%s"
-msgstr ""
+msgstr "Повторная попытка #%s"
 
 msgid "Save"
 msgstr "Сохранить"
@@ -450,7 +451,7 @@ msgid "Save configuration"
 msgstr "Настройки сохраняются"
 
 msgid "Screen DPMS"
-msgstr ""
+msgstr "Экран DPMS"
 
 msgid "Screen Power Off Time"
 msgstr "Время выключения экрана"
@@ -462,11 +463,11 @@ msgid "Select"
 msgstr "Выбирать"
 
 msgid "Send"
-msgstr ""
+msgstr "Отправить"
 
 #, python-format
 msgid "Sending Power ON signal to: %s"
-msgstr ""
+msgstr "Отправка сигнала включения питания на: %s"
 
 msgid "Set Temp"
 msgstr "Заданная температура"
@@ -484,7 +485,7 @@ msgid "Slicer"
 msgstr "Слайсер"
 
 msgid "Slicer Time correction (%)"
-msgstr ""
+msgstr "Коррекция времени Слайсер (%)"
 
 msgid "Small"
 msgstr "Маленький"
@@ -545,7 +546,7 @@ msgid "Tool"
 msgstr "Инструмент"
 
 msgid "Total:"
-msgstr ""
+msgstr "Итого:"
 
 msgid "Unknown Heater"
 msgstr "Неизвестный обогреватель"
@@ -614,7 +615,7 @@ msgstr[1] "часа"
 msgstr[2] "часа"
 
 msgid "minutes"
-msgstr "мин."
+msgstr "минут"
 
 msgid "mm"
 msgstr "мм"
