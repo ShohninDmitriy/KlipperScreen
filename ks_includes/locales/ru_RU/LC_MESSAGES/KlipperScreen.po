@@ -6,17 +6,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-20 10:15-0300\n"
-"PO-Revision-Date: 2022-03-22 19:07+0300\n"
+"POT-Creation-Date: 2022-03-31 11:25-0300\n"
+"PO-Revision-Date: 2022-03-31 11:10-0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: \n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.0\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Generator: Poedit 3.0.1\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
 #, python-format
@@ -53,6 +53,9 @@ msgstr "Вы уверены, что хотите запустить аварий
 
 msgid "Are you sure you wish to cancel this print?"
 msgstr "Вы хотите отменить эту печать?"
+
+msgid "Are you sure you wish to disable motors?"
+msgstr "Вы уверены, что хотите отключить двигатели?"
 
 msgid "Are you sure you wish to reboot the system?"
 msgstr "Вы уверены что хотите перезагрузить систему?"
@@ -201,7 +204,9 @@ msgstr "Точная настройка"
 msgid "Finish"
 msgstr "Конец"
 
-msgid "Firmware Restart"
+msgid ""
+"Firmware\n"
+"Restart"
 msgstr ""
 "Рестарт\n"
 "прошивки"
@@ -209,8 +214,18 @@ msgstr ""
 msgid "Font Size"
 msgstr "Размер шрифта"
 
+msgid ""
+"Full\n"
+"Update"
+msgstr ""
+"Полный\n"
+"Обновлять"
+
 msgid "Go Back"
 msgstr "Назад"
+
+msgid "Hidden"
+msgstr "Скрытый"
 
 msgid "Hide"
 msgstr "Скрывать"
@@ -242,12 +257,6 @@ msgstr "Парковка"
 msgid "Hostname"
 msgstr "Имя хоста"
 
-msgid "IPv4"
-msgstr "IPv4"
-
-msgid "IPv6"
-msgstr "IPv6"
-
 msgid "Icon Theme"
 msgstr "Темы"
 
@@ -275,10 +284,12 @@ msgstr "Инверсия Y"
 msgid "Invert Z"
 msgstr "Инверсия Z"
 
-msgid "Klipper Restart"
+msgid ""
+"Klipper\n"
+"Restart"
 msgstr ""
-"Рестарт\n"
-"Klipper"
+"Klipper\n"
+"Рестарт"
 
 msgid "Klipper has disconnected"
 msgstr "Нет связи с Klipper"
@@ -371,8 +382,8 @@ msgstr "PSK для"
 msgid "Package will be updated"
 msgid_plural "Packages will be updated"
 msgstr[0] "Пакет будет обновлен"
-msgstr[1] "Пакеты будут обновлены "
-msgstr[2] "Пакеты будут обновлены "
+msgstr[1] "Пакеты будут обновляться"
+msgstr[2] "Пакеты будут обновляться"
 
 msgid "Password saved"
 msgstr "Пароль сохранен"
@@ -382,6 +393,9 @@ msgstr "Пауза"
 
 msgid "Paused"
 msgstr "Приостановлено"
+
+msgid "Perform a full upgrade?"
+msgstr "Выполнить полное обновление?"
 
 msgid "Please recompile and flash the micro-controller."
 msgstr "Прошейте заново микроконтроллер."
@@ -508,8 +522,8 @@ msgstr "Квадратная угловая скорость"
 msgid "Start"
 msgstr "Hачать"
 
-msgid "Starting WiFi Re-association"
-msgstr "WiFi реконенект"
+msgid "Starting WiFi Association"
+msgstr "Запуск ассоциации WiFi"
 
 msgid "Starting recovery for"
 msgstr "Запуск восстановления для"
@@ -560,6 +574,9 @@ msgstr "Обновлено"
 msgid "Update"
 msgstr "Обновить"
 
+msgid "Updating"
+msgstr "Обновление"
+
 msgid "Uploaded"
 msgstr "Дата"
 
@@ -587,8 +604,8 @@ msgstr "Калибр. Z"
 msgid "Z Move Speed (mm/s)"
 msgstr "Скорость перемещения по оси Z (мм/с)"
 
-msgid "Z Offset"
-msgstr "Офсет Z"
+msgid "Z Position"
+msgstr "Позиция Z"
 
 msgid "Z Tilt"
 msgstr "Z Наклон"
@@ -625,6 +642,15 @@ msgstr "мм/с"
 
 msgid "mm/s^2"
 msgstr "мм/с^2"
+
+#~ msgid "IPv4"
+#~ msgstr "IPv4"
+
+#~ msgid "IPv6"
+#~ msgstr "IPv6"
+
+#~ msgid "Z Offset"
+#~ msgstr "Офсет Z"
 
 #~ msgid "Unknown Heater "
 #~ msgstr "Неизвестный обогреватель "
