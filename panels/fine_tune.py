@@ -15,7 +15,7 @@ class FineTunePanel(ScreenPanel):
     user_selecting = False
 
     bs = 0
-    bs_delta = "0.01"
+    bs_delta = "0.005"
     bs_deltas = ["0.005", "0.01"]
     percent_delta = 1
     percent_deltas = ['1', '5', '10', '25']
@@ -81,7 +81,7 @@ class FineTunePanel(ScreenPanel):
         if self._screen.vertical_mode:
             self.labels['z+'] = self._gtk.ButtonImage("z-farther", _("Z+"), "color1")
             self.labels['z-'] = self._gtk.ButtonImage("z-closer", _("Z-"), "color1")
-            self.labels['zoffset'] = self._gtk.ButtonImage("refresh", "  0.00" + _("mm"),
+            self.labels['zoffset'] = self._gtk.ButtonImage("refresh", "  0.000" + _("mm"),
                                                            "color1", .6, Gtk.PositionType.LEFT, False)
 
             self.labels['speed+'] = self._gtk.ButtonImage("speed+", _("Speed +"), "color3")
@@ -109,7 +109,7 @@ class FineTunePanel(ScreenPanel):
             grid.attach(deltgrid, 0, 4, 3, 1)
         else:
             self.labels['z+'] = self._gtk.ButtonImage("z-farther", _("Z+"), "color1")
-            self.labels['zoffset'] = self._gtk.ButtonImage("refresh", "  0.00" + _("mm"),
+            self.labels['zoffset'] = self._gtk.ButtonImage("refresh", "  0.000" + _("mm"),
                                                            "color1", .6, Gtk.PositionType.LEFT, False)
             self.labels['z-'] = self._gtk.ButtonImage("z-closer", _("Z-"), "color1")
 
