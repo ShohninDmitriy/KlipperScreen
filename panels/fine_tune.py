@@ -32,7 +32,7 @@ class FineTunePanel(ScreenPanel):
             bs = print_cfg.get("z_babystep_values", "0.005, 0.01")
             if re.match(r'^[0-9,\.\s]+$', bs):
                 bs = [str(i.strip()) for i in bs.split(',')]
-                if len(bs) <= 3:
+                if len(bs) <= 2:
                     self.bs_deltas = bs
                 else:
                     self.bs_deltas = [bs[0], bs[-1]]
@@ -154,7 +154,7 @@ class FineTunePanel(ScreenPanel):
 
         if "gcode_move" in data:
             if "homing_origin" in data["gcode_move"]:
-                self.labels['zoffset'].set_label("  %.2fmm" % data["gcode_move"]["homing_origin"][2])
+                self.labels['zoffset'].set_label("  %.2fmm" % data["gcode_move"]["homing_origin"][3])
             if "extrude_factor" in data["gcode_move"]:
                 self.extrusion = int(round(data["gcode_move"]["extrude_factor"]*100))
                 self.labels['extrudefactor'].set_label("  %3d%%" % self.extrusion)
