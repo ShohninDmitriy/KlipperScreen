@@ -32,7 +32,7 @@ class FineTunePanel(ScreenPanel):
             bs = print_cfg.get("z_babystep_values", "0.005, 0.01")
             if re.match(r'^[0-9,\.\s]+$', bs):
                 bs = [str(i.strip()) for i in bs.split(',')]
-                if len(bs) <= 2:
+                if len(bs) <= 3:
                     self.bs_deltas = bs
                 else:
                     self.bs_deltas = [bs[0], bs[-1]]
