@@ -154,7 +154,7 @@ class FineTunePanel(ScreenPanel):
 
         if "gcode_move" in data:
             if "homing_origin" in data["gcode_move"]:
-                self.labels['zoffset'].set_label("  %.2fmm" % data["gcode_move"]["homing_origin"][3])
+                self.labels['zoffset'].set_label("  %.3fmm" % data["gcode_move"]["homing_origin"][2])
             if "extrude_factor" in data["gcode_move"]:
                 self.extrusion = int(round(data["gcode_move"]["extrude_factor"]*100))
                 self.labels['extrudefactor'].set_label("  %3d%%" % self.extrusion)
