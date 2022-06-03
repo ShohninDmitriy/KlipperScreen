@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-31 11:25-0300\n"
+"POT-Creation-Date: 2022-06-02 14:53-0300\n"
 "PO-Revision-Date: 2022-03-31 11:10-0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: \n"
@@ -33,8 +33,14 @@ msgid "A FIRMWARE_RESTART may fix the issue."
 msgstr ""
 "Выполните перезагрузку прошивки, чтобы попытаться исправить проблему."
 
+msgid "ADXL Not Configured"
+msgstr ""
+
 msgid "Abort"
 msgstr "Отменить"
+
+msgid "Acceleration:"
+msgstr ""
 
 msgid "Accept"
 msgstr "Применить"
@@ -47,6 +53,17 @@ msgstr "Добавить принтер"
 
 msgid "Add bed mesh profile"
 msgstr "Добавить профиль сетки стола"
+
+msgid "Apply"
+msgstr ""
+
+#, python-format
+msgid "Apply %.2f offset to Endstop?"
+msgstr ""
+
+#, python-format
+msgid "Apply %s%.2f offset to Probe?"
+msgstr ""
 
 msgid "Are you sure you want to run Emergency Stop?"
 msgstr "Вы уверены, что хотите запустить аварийную остановку?"
@@ -66,6 +83,9 @@ msgstr "Вы хотите выключить принтер?"
 msgid "Auto"
 msgstr "Авто"
 
+msgid "Auto-calibrate"
+msgstr ""
+
 msgid "Auto-scroll"
 msgstr "Автоматическая прокрутка"
 
@@ -81,8 +101,14 @@ msgstr "Bltouch обнаружил примененное смещение"
 msgid "Calibrate"
 msgstr "Калибровка"
 
+msgid "Calibrated"
+msgstr ""
+
 msgid "Calibrated, save configuration to make it permanent"
 msgstr "Откалибровано, сохраните конфигурацию, чтобы сделать ее постоянной"
+
+msgid "Calibrating..."
+msgstr ""
 
 msgid "Can't set above the maximum:"
 msgstr "Невозможно установить выше максимума:"
@@ -111,6 +137,12 @@ msgid ""
 msgstr ""
 "Проверьте /tmp/KlipperScreen.log для дополнитольной информации.\n"
 "Создайте issues на GitHub что-бы получить помощь."
+
+msgid "Check ADXL Wiring"
+msgstr ""
+
+msgid "Clear"
+msgstr ""
 
 msgid "Close"
 msgstr "Закрыть"
@@ -158,9 +190,6 @@ msgstr "Откл. моторы"
 msgid "Disable XY"
 msgstr "Отключить XY"
 
-msgid "Displayed Macros"
-msgstr "Показать  макросы"
-
 msgid "Distance (mm)"
 msgstr "Расстояние (mm)"
 
@@ -195,8 +224,23 @@ msgstr "Обдув"
 msgid "Filament Used"
 msgstr "Использование филамента"
 
+msgid "Filament total:"
+msgstr ""
+
+msgid "Filament used:"
+msgstr ""
+
+msgid "Filament:"
+msgstr ""
+
 msgid "File"
 msgstr "Файл"
+
+msgid "File:"
+msgstr ""
+
+msgid "Finding ADXL"
+msgstr ""
 
 msgid "Fine Tuning"
 msgstr "Точная настройка"
@@ -211,6 +255,12 @@ msgstr ""
 "Рестарт\n"
 "прошивки"
 
+msgid "Flow:"
+msgstr ""
+
+msgid "Flowrate:"
+msgstr ""
+
 msgid "Font Size"
 msgstr "Размер шрифта"
 
@@ -224,6 +274,9 @@ msgstr ""
 msgid "Go Back"
 msgstr "Назад"
 
+msgid "Height:"
+msgstr ""
+
 msgid "Hidden"
 msgstr "Скрытый"
 
@@ -232,6 +285,9 @@ msgstr "Скрывать"
 
 msgid "Hide sensors in Temp."
 msgstr "Скрыть датчики в Temp."
+
+msgid "Hide temp."
+msgstr ""
 
 msgid "Home"
 msgstr "Парковка"
@@ -268,6 +324,9 @@ msgstr "Запуск"
 
 msgid "Initializing printer..."
 msgstr "Принтер стартует..."
+
+msgid "Input Shaper"
+msgstr ""
 
 msgid "Interface"
 msgstr "Интерфейс"
@@ -312,6 +371,9 @@ msgstr "Язык"
 msgid "Large"
 msgstr "Большой"
 
+msgid "Layer:"
+msgstr ""
+
 msgid "Left:"
 msgstr "Осталось:"
 
@@ -333,14 +395,23 @@ msgstr "Макросы"
 msgid "Main Menu"
 msgstr "Главное меню"
 
-msgid "Max Accelation"
-msgstr "Ускорения"
+msgid "Max Acceleration"
+msgstr ""
 
 msgid "Max Acceleration to Deceleration"
 msgstr "Ускорения торможения"
 
 msgid "Max Velocity"
 msgstr "Скорость"
+
+msgid "Measure Both"
+msgstr ""
+
+msgid "Measure X"
+msgstr ""
+
+msgid "Measure Y"
+msgstr ""
 
 msgid "Medium"
 msgstr "Средний"
@@ -365,6 +436,9 @@ msgstr "Имя"
 
 msgid "Network"
 msgstr "Сеть"
+
+msgid "New"
+msgstr ""
 
 msgid "Nothing selected"
 msgstr "Ничего не выбрано"
@@ -406,6 +480,9 @@ msgstr "Включено"
 msgid "Power On Printer"
 msgstr "Включить принтер"
 
+msgid "Pressure Advance:"
+msgstr ""
+
 msgid "Print"
 msgstr "Печать"
 
@@ -420,6 +497,9 @@ msgstr "Подключение принтера"
 
 msgid "Printing"
 msgstr "Печатается"
+
+msgid "Probe Offset"
+msgstr ""
 
 msgid "Probe found applied offset"
 msgstr "Probe обнаружил примененное смещение"
@@ -451,6 +531,15 @@ msgstr "Продолжить"
 msgid "Retract"
 msgstr "Втянуть"
 
+msgid "Retraction"
+msgstr ""
+
+msgid "Retraction Length"
+msgstr ""
+
+msgid "Retraction Speed"
+msgstr ""
+
 #, python-format
 msgid "Retry #%s"
 msgstr "Повторная попытка #%s"
@@ -461,8 +550,18 @@ msgstr "Сохранить"
 msgid "Save Config"
 msgstr "Сохр. Конфиг"
 
-msgid "Save configuration"
-msgstr "Настройки сохраняются"
+msgid "Save Z"
+msgstr ""
+
+msgid "Save configuration?"
+msgstr ""
+
+msgid "Saved"
+msgstr ""
+
+#, python-format
+msgid "Saved offset: %s"
+msgstr ""
 
 msgid "Screen DPMS"
 msgstr "Экран DPMS"
@@ -501,11 +600,17 @@ msgstr "Слайсер"
 msgid "Slicer Time correction (%)"
 msgstr "Коррекция времени Слайсер (%)"
 
+msgid "Slicer:"
+msgstr ""
+
 msgid "Small"
 msgstr "Маленький"
 
 msgid "Sort by: "
 msgstr "Орден: "
+
+msgid "Sort:"
+msgstr ""
 
 msgid "Speed (mm/s)"
 msgstr "Скорость (мм/с)"
@@ -515,6 +620,9 @@ msgstr "Скорость +"
 
 msgid "Speed -"
 msgstr "Скорость -"
+
+msgid "Speed:"
+msgstr ""
 
 msgid "Square Corner Velocity"
 msgstr "Квадратная угловая скорость"
@@ -568,6 +676,12 @@ msgstr "Неизвестный обогреватель"
 msgid "Unload"
 msgstr "Загружено"
 
+msgid "Unretract Extra Length"
+msgstr ""
+
+msgid "Unretract Speed"
+msgstr ""
+
 msgid "Up To Date"
 msgstr "Обновлено"
 
@@ -592,6 +706,9 @@ msgstr "X-"
 msgid "XY Move Speed (mm/s)"
 msgstr "Скорость перемещения по осям XY (мм/с)"
 
+msgid "XY Speed (mm/s)"
+msgstr ""
+
 msgid "Y+"
 msgstr "Y+"
 
@@ -604,11 +721,14 @@ msgstr "Калибр. Z"
 msgid "Z Move Speed (mm/s)"
 msgstr "Скорость перемещения по оси Z (мм/с)"
 
-msgid "Z Position"
-msgstr "Позиция Z"
+msgid "Z Speed (mm/s)"
+msgstr ""
 
 msgid "Z Tilt"
 msgstr "Z Наклон"
+
+msgid "Z offset:"
+msgstr ""
 
 msgid "Z+"
 msgstr "Z+"
@@ -643,14 +763,17 @@ msgstr "мм/с"
 msgid "mm/s^2"
 msgstr "мм/с^2"
 
+#~ msgid "Displayed Macros"
+#~ msgstr "Показать  макросы"
+
+#~ msgid "Z Position"
+#~ msgstr "Позиция Z"
+
 #~ msgid "IPv4"
 #~ msgstr "IPv4"
 
 #~ msgid "IPv6"
 #~ msgstr "IPv6"
-
-#~ msgid "Z Offset"
-#~ msgstr "Офсет Z"
 
 #~ msgid "Unknown Heater "
 #~ msgstr "Неизвестный обогреватель "
@@ -719,9 +842,6 @@ msgstr "мм/с^2"
 
 #~ msgid "Fast"
 #~ msgstr "Быстро"
-
-#~ msgid "Set Speed"
-#~ msgstr "Скорость"
 
 #~ msgid "Slow"
 #~ msgstr "Mедленно"
