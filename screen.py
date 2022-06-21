@@ -933,7 +933,7 @@ class KlipperScreen(Gtk.Window):
         else:
             # Moonraker is ready, set a loop to init the printer
             self.reinit_count += 1
-            self.init_printer_timeout = GLib.timeout_add_seconds(3, self.init_printer)
+            self.init_printer_timeout = GLib.timeout_add_seconds(7, self.init_printer)
 
         self.shutdown = False
         powerdevs = self.apiclient.send_request("machine/device_power/devices")
