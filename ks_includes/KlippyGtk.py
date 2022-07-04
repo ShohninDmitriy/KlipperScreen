@@ -10,9 +10,9 @@ from gi.repository import Gdk, GdkPixbuf, Gio, Gtk, Pango
 
 class KlippyGtk:
     labels = {}
-    keyboard_ratio = .22
     width_ratio = 16
     height_ratio = 9.375
+    keyboard_ratio = .5
 
     def __init__(self, screen, width, height, theme, cursor, fontsize_type):
         self.screen = screen
@@ -33,6 +33,7 @@ class KlippyGtk:
         elif fontsize_type == "large":
             self.font_size = round(self.font_size * 1.09)
         self.header_size = int(round((self.width / self.width_ratio) / 1.33))
+        self.titlebar_height = self.font_size * 2
         self.img_width = int(round(self.width / self.width_ratio))
         self.img_height = int(round(self.height / self.height_ratio))
         if self.screen.vertical_mode:
@@ -62,10 +63,16 @@ class KlippyGtk:
         return self.width - self.action_bar_width
 
     def get_content_height(self):
-        return self.height - self.header_size
+        if self.screen.vertical_mode:
+            return self.height - self.titlebar_height - self.action_bar_height
+        else:
+            return self.height - self.titlebar_height
 
     def get_font_size(self):
         return self.font_size
+
+    def get_titlebar_height(self):
+        return self.titlebar_height
 
     def get_header_size(self):
         return self.header_size
@@ -77,7 +84,7 @@ class KlippyGtk:
         return self.img_height
 
     def get_keyboard_height(self):
-        return (self.width - self.get_action_bar_width()) * self.keyboard_ratio
+        return self.get_content_height() * self.keyboard_ratio
 
     def get_temp_color(self, device):
         # logging.debug("Color list %s" % self.color_list)
@@ -164,14 +171,15 @@ class KlippyGtk:
         b.connect("clicked", self.screen.reset_screensaver_timeout)
         return b
 
-    def ButtonImage(self, image_name, label=None, style=None, scale=1.38,
+    def ButtonImage(self, image_name=None, label=None, style=None, scale=1.38,
                     position=Gtk.PositionType.TOP, word_wrap=True):
 
         b = Gtk.Button(label=label)
         b.set_hexpand(True)
         b.set_vexpand(True)
         b.set_can_focus(False)
-        b.set_image(self.Image(image_name, scale))
+        if image_name is not None:
+            b.set_image(self.Image(image_name, scale))
         b.set_image_position(position)
         b.set_always_show_image(True)
 
@@ -284,6 +292,11 @@ class KlippyGtk:
         return text
 
     def formatTemperatureString(self, temp, target):
+        if temp is None:
+            logging.debug("Temp is none")
+            return
+        if target is None:
+            target = 0
         if (temp - 2 < target < temp + 2) or round(target, 0) == 0:
             return str(round(temp, 1)) + "°C"  # °C →"
         return str(round(temp)) + " °C\n(" + str(round(target)) + ")"
