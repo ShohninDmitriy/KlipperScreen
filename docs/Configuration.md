@@ -27,6 +27,9 @@ job_complete_timeout: 0
 # Time in seconds before the Job Status closes itself if an error is encountered
 job_error_timeout: 0
 
+# Autoclose popups, this includes various notifications and M118
+autoclose_popups: True
+
 # Specify the language
 #   The language can be specified here instead of using the system default language.
 language: en
@@ -44,6 +47,11 @@ default_printer: Ender 3 Pro
 # set this to False. See Menu section below.
 use_default_menu: True
 
+# Screen DPMS
+# By default DPMS is used to turn off the screen, this should prevent burn-in and save power.
+# However if you find that your screen doesn't turn off because it doesn't support it
+# Setting this to false will just turn the screen black.
+use_dpms: True
 ```
 
 ## Printer Options
@@ -84,24 +92,30 @@ titlebar_name_type: None
 calibrate_x_position: 100
 calibrate_y_position: 100
 
-# Screen DPMS
-# By default DPMS is used to turn off the screen, this should prevent burn-in and save power.
-# However if you find that your screen doesn't turn off because it doesn't support it
-# Setting this to false will just turn the screen black.
-use_dpms: True
+# Bed Screws
+# define the screw positons required for odd number of screws in a comma separated list
+# possible values are: bl, br, bm, fl, fr, fm, lm, rm
+# they correspond to back-left, back-right, back-middle, front-left, front-right, front-middle, left-middle, left-right
+screw_positions: ""
+
+# Rotation is useful if the screen is not directly in front of the machine.
+# Valid values are 0 90 180 270
+screw_rotation: 0
 ```
 
 ## Preheat Options
 ```py
 [preheat my_temp_setting]
-# Temperature for the heated bed
-bed: 40
-# Temperature for the tools
 extruder: 195
-# Temperature for generic heaters
-heater_generic: 40
-# Temperature controlled fans (temperature_fan in klipper config)
+extruder1: 60
+heater_bed: 40
+# Use the name
+chamber: 60
+# or the full name
+heater_generic chamber: 60
+# or for example apply the same temp to devices of the same type
 temperature_fan: 40
+heater_generic: 60
 # optional GCode to run when the option is selected
 gcode: MY_HEATSOAK_MACRO
 ```
@@ -112,14 +126,6 @@ for example:
 ```py
 [preheat cooldown]
 gcode: M107
-```
-
-## Bed Screws
-```py
-[bed_screws]
-# Rotation is useful if the screen is not directly in front of the machine.
-# Valid values are 0 90 180 270
-rotation: 0
 ```
 
 ## Menu
