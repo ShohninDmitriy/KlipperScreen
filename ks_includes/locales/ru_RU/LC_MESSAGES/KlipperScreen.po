@@ -520,7 +520,7 @@ msgid "Printer Connections"
 msgstr "Подключение принтера"
 
 msgid "Printer Select"
-msgstr ""
+msgstr "Выбор принтера"
 
 msgid "Printing"
 msgstr "Печатается"
