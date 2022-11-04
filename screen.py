@@ -97,11 +97,14 @@ class KlipperScreen(Gtk.Window):
         self.lang_ltr = self.set_text_direction(self._config.get_main_config().get("language", None))
 
         Gtk.Window.__init__(self)
+        self.set_title("KlipperScreen")
         monitor = Gdk.Display.get_default().get_primary_monitor()
         self.width = self._config.get_main_config().getint("width", monitor.get_geometry().width)
         self.height = self._config.get_main_config().getint("height", monitor.get_geometry().height)
         self.set_default_size(self.width, self.height)
         self.set_resizable(False)
+        if not (self._config.get_main_config().get("width") or self._config.get_main_config().get("height")):
+            self.fullscreen()
         self.vertical_mode = self.width < self.height
         logging.info(f"Screen resolution: {self.width}x{self.height}")
         self.theme = self._config.get_main_config().get('theme')
@@ -109,6 +112,7 @@ class KlipperScreen(Gtk.Window):
         self.gtk = KlippyGtk(self, self.width, self.height, self.theme, self.show_cursor,
                              self._config.get_main_config().get("font_size", "medium"))
         self.init_style()
+        self.set_icon_from_file(os.path.join(klipperscreendir, "styles", "icon.svg"))
 
         self.base_panel = BasePanel(self, title="Base Panel", back=False)
         self.add(self.base_panel.get())
@@ -161,7 +165,6 @@ class KlipperScreen(Gtk.Window):
             if self.printer.get_state() not in ["disconnected", "error", "startup", "shutdown"]:
                 self.base_panel.show_heaters(True)
             self.base_panel.show_printer_select(True)
-            self.base_panel.show_macro_shortcut(self._config.get_main_config().getboolean('side_macro_shortcut', True))
             return
 
         # Cleanup
@@ -728,7 +731,6 @@ class KlipperScreen(Gtk.Window):
             return
 
         logging.debug("### Going to disconnected")
-        self.base_panel.show_macro_shortcut(False)
         self.wake_screen()
         self.printer_initializing(_("Klipper has disconnected"))
         if self.connected_printer is not None:
@@ -743,7 +745,6 @@ class KlipperScreen(Gtk.Window):
             self.printer_select_callbacks = [self.state_error]
             return
 
-        self.base_panel.show_macro_shortcut(False)
         self.wake_screen()
         msg = self.printer.get_stat("webhooks", "state_message")
         if "FIRMWARE_RESTART" in msg:
@@ -785,6 +786,7 @@ class KlipperScreen(Gtk.Window):
 
         self.base_panel.show_macro_shortcut(self._config.get_main_config().getboolean('side_macro_shortcut', True))
         self.base_panel.show_heaters(True)
+        self.base_panel.show_estop(True)
 
         # Do not return to main menu if completing a job, timeouts/user input will return
         if "job_status" in self._cur_panels or "main_menu" in self._cur_panels:
@@ -808,7 +810,6 @@ class KlipperScreen(Gtk.Window):
             self.printer_select_callbacks = [self.state_shutdown]
             return
 
-        self.base_panel.show_macro_shortcut(False)
         self.wake_screen()
         msg = self.printer.get_stat("webhooks", "state_message")
         if "ready" in msg:
@@ -933,7 +934,7 @@ class KlipperScreen(Gtk.Window):
 
     def printer_initializing(self, text=None, disconnect=False):
         self.close_popup_message()
-        self.show_panel('splash_screen', "splash_screen", _("Home"), 2)
+        self.show_panel('splash_screen', "splash_screen", None, 2)
         if disconnect is True and self.printer is not None:
             self.shutdown = True
             self.printer.state = "disconnected"
@@ -1038,7 +1039,7 @@ class KlipperScreen(Gtk.Window):
 
     def printer_ready(self):
         self.close_popup_message()
-        self.show_panel('main_panel', "main_menu", _("Home"), 2,
+        self.show_panel('main_panel', "main_menu", None, 2,
                         items=self._config.get_menu_items("__main"), extrudercount=self.printer.get_extruder_count())
         self.ws_subscribe()
         if "job_status" in self.panels:
@@ -1050,6 +1051,7 @@ class KlipperScreen(Gtk.Window):
         self.show_panel('job_status', "job_status", _("Printing"), 2)
         self.base_panel.show_heaters(True)
         self.base_panel.show_macro_shortcut(self._config.get_main_config().getboolean('side_macro_shortcut', True))
+        self.base_panel.show_estop(True)
         for dialog in self.dialogs:
             dialog.destroy()
 
@@ -1123,12 +1125,17 @@ class KlipperScreen(Gtk.Window):
 def main():
     version = functions.get_software_version()
     parser = argparse.ArgumentParser(description="KlipperScreen - A GUI for Klipper")
+    homedir = os.path.expanduser("~")
+
     parser.add_argument(
-        "-c", "--configfile", default="~/KlipperScreen.conf", metavar='<configfile>',
+        "-c", "--configfile", default=os.path.join(homedir, "KlipperScreen.conf"), metavar='<configfile>',
         help="Location of KlipperScreen configuration file"
     )
+    logdir = os.path.join(homedir, "printer_data", "logs")
+    if not os.path.exists(logdir):
+        logdir = "/tmp"
     parser.add_argument(
-        "-l", "--logfile", default="/tmp/KlipperScreen.log", metavar='<logfile>',
+        "-l", "--logfile", default=os.path.join(logdir, "KlipperScreen.log"), metavar='<logfile>',
         help="Location of KlipperScreen logfile output"
     )
     args = parser.parse_args()

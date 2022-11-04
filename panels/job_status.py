@@ -440,7 +440,7 @@ class JobStatusPanel(ScreenPanel):
         if self.filename != "none":
             self._screen._ws.klippy.print_start(self.filename)
             self.new_print()
-        GLib.timeout_add_seconds(5, self.enable_button("restart"))
+        GLib.timeout_add_seconds(5, self.enable_button, "restart")
 
     def resume(self, widget):
         self._screen._ws.klippy.print_resume(self._response_callback, "enable_button", "pause", "cancel")
@@ -490,14 +490,12 @@ class JobStatusPanel(ScreenPanel):
             self.enable_button(*args)
 
     def close_panel(self, widget=None):
-        self.disable_button("menu")
         logging.debug("Closing job_status panel")
         self.remove_close_timeout()
         self.state_check()
         if self.state not in ["printing", "paused", "cancelling"]:
             self._screen.printer_ready()
             self._printer.change_state("ready")
-            GLib.timeout_add_seconds(5, self.enable_button("menu"))
 
         return False
 
@@ -826,11 +824,11 @@ class JobStatusPanel(ScreenPanel):
     def show_file_thumbnail(self):
         if self._files.has_thumbnail(self.filename):
             if self._screen.vertical_mode:
-                width = -1
+                width = self._screen.width * 0.9
                 height = self._screen.height / 4
             else:
                 width = self._screen.width / 3
-                height = -1
+                height = self._gtk.get_content_height() * 0.48
             pixbuf = self.get_file_image(self.filename, width, height)
             if pixbuf is not None:
                 self.labels['thumbnail'].set_from_pixbuf(pixbuf)
