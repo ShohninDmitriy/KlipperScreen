@@ -10,7 +10,6 @@ import os
 import signal
 import subprocess
 import pathlib
-import traceback  # noqa
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib, Pango
@@ -27,9 +26,6 @@ from ks_includes.config import KlipperScreenConfig
 from panels.base_panel import BasePanel
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
-# This is here to avoid performance issues opening bed_mesh
-import matplotlib.pyplot  # noqa
 
 PRINTER_BASE_STATUS_OBJECTS = [
     'bed_mesh',
@@ -51,6 +47,21 @@ PRINTER_BASE_STATUS_OBJECTS = [
 ]
 
 klipperscreendir = pathlib.Path(__file__).parent.resolve()
+
+
+def set_text_direction(lang=None):
+    rtl_languages = ['he_IL']
+    if lang is None:
+        for lng in rtl_languages:
+            if os.getenv('LANG').startswith(lng):
+                lang = lng
+                break
+    if lang in rtl_languages:
+        Gtk.Widget.set_default_direction(Gtk.TextDirection.RTL)
+        logging.debug("Enabling RTL mode")
+        return False
+    Gtk.Widget.set_default_direction(Gtk.TextDirection.LTR)
+    return True
 
 
 class KlipperScreen(Gtk.Window):
@@ -94,7 +105,7 @@ class KlipperScreen(Gtk.Window):
         configfile = os.path.normpath(os.path.expanduser(args.configfile))
 
         self._config = KlipperScreenConfig(configfile, self)
-        self.lang_ltr = self.set_text_direction(self._config.get_main_config().get("language", None))
+        self.lang_ltr = set_text_direction(self._config.get_main_config().get("language", None))
 
         Gtk.Window.__init__(self)
         self.set_title("KlipperScreen")
@@ -244,14 +255,15 @@ class KlipperScreen(Gtk.Window):
     def ws_subscribe(self):
         requested_updates = {
             "objects": {
-                "bed_mesh": ["profile_name", "mesh_max", "mesh_min", "probed_matrix"],
+                "bed_mesh": ["profile_name", "mesh_max", "mesh_min", "probed_matrix", "profiles"],
                 "configfile": ["config"],
                 "display_status": ["progress", "message"],
                 "fan": ["speed"],
                 "gcode_move": ["extrude_factor", "gcode_position", "homing_origin", "speed_factor", "speed"],
                 "idle_timeout": ["state"],
                 "pause_resume": ["is_paused"],
-                "print_stats": ["print_duration", "total_duration", "filament_used", "filename", "state", "message"],
+                "print_stats": ["print_duration", "total_duration", "filament_used", "filename", "state", "message",
+                                "info"],
                 "toolhead": ["homed_axes", "estimated_print_time", "print_time", "position", "extruder",
                              "max_accel", "max_accel_to_decel", "max_velocity", "square_corner_velocity"],
                 "virtual_sdcard": ["file_position", "is_active", "progress"],
@@ -347,8 +359,7 @@ class KlipperScreen(Gtk.Window):
         logging.debug(f"Current panel hierarchy: {self._cur_panels}")
 
     def show_popup_message(self, message, level=3):
-        if self.screensaver is not None:
-            self.wake_screen()
+        self.close_screensaver()
         if self.popup_message is not None:
             self.close_popup_message()
 
@@ -658,7 +669,6 @@ class KlipperScreen(Gtk.Window):
         if self._config.get_main_config().get('screen_blanking') != "off":
             logging.debug("Screen wake up")
             os.system("xset -display :0 dpms force on")
-            self.close_screensaver()
 
     def set_dpms(self, use_dpms):
         self.use_dpms = use_dpms
@@ -729,7 +739,7 @@ class KlipperScreen(Gtk.Window):
             return
 
         logging.debug("### Going to disconnected")
-        self.wake_screen()
+        self.close_screensaver()
         self.printer_initializing(_("Klipper has disconnected"))
         if self.connected_printer is not None:
             self.connected_printer = None
@@ -743,7 +753,7 @@ class KlipperScreen(Gtk.Window):
             self.printer_select_callbacks = [self.state_error]
             return
 
-        self.wake_screen()
+        self.close_screensaver()
         msg = self.printer.get_stat("webhooks", "state_message")
         if "FIRMWARE_RESTART" in msg:
             self.printer_initializing("<b>" + _("Klipper has encountered an error.") + "\n" +
@@ -804,7 +814,7 @@ class KlipperScreen(Gtk.Window):
             self.printer_select_callbacks = [self.state_shutdown]
             return
 
-        self.wake_screen()
+        self.close_screensaver()
         msg = self.printer.get_stat("webhooks", "state_message")
         if "ready" in msg:
             msg = ""
@@ -814,23 +824,9 @@ class KlipperScreen(Gtk.Window):
     def toggle_macro_shortcut(self, value):
         self.base_panel.show_macro_shortcut(value)
 
-    def set_text_direction(self, lang=None):
-        rtl_languages = ['he_IL']
-        if lang is None:
-            for lng in rtl_languages:
-                if os.getenv('LANG').startswith(lng):
-                    lang = lng
-                    break
-        if lang in rtl_languages:
-            Gtk.Widget.set_default_direction(Gtk.TextDirection.RTL)
-            logging.debug("Enabling RTL mode")
-            return False
-        Gtk.Widget.set_default_direction(Gtk.TextDirection.LTR)
-        return True
-
     def change_language(self, lang):
         self._config.install_language(lang)
-        self.lang_ltr = self.set_text_direction(lang)
+        self.lang_ltr = set_text_direction(lang)
         self._config._create_configurable_options(self)
         self.reload_panels()
 
@@ -936,7 +932,7 @@ class KlipperScreen(Gtk.Window):
             self.panels['splash_screen'].update_text(text)
 
     def search_power_devices(self, power_devices):
-        if self.connected_printer is None:
+        if self.connected_printer is None or not power_devices:
             return
         found_devices = []
         devices = self.printer.get_power_devices()
@@ -950,7 +946,7 @@ class KlipperScreen(Gtk.Window):
             logging.info("Found %s", found_devices)
             return found_devices
         else:
-            logging.info("Power devices not found")
+            logging.info("Associated power devices not found")
             return None
 
     def power_on(self, widget, devices):
@@ -1047,6 +1043,7 @@ class KlipperScreen(Gtk.Window):
             del self.panels["job_status"]
 
     def printer_printing(self):
+        self.close_screensaver()
         self.close_popup_message()
         self.show_panel('job_status', "job_status", _("Printing"), 2)
         self.base_panel_show_all()
