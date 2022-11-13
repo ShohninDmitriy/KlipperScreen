@@ -65,7 +65,7 @@ msgid "Apply %s%.2f offset to Probe?"
 msgstr "Применить смещение %s%.2f к зонду?"
 
 msgid "Are you sure do you want to exclude the object?"
-msgstr ""
+msgstr "Вы уверены, что хотите исключить объект?"
 
 msgid "Are you sure you want to run Emergency Stop?"
 msgstr "Вы уверены, что хотите запустить аварийную остановку?"
@@ -422,7 +422,7 @@ msgid "Menu"
 msgstr "Меню"
 
 msgid "Mesh calibrate"
-msgstr ""
+msgstr "Калибровка сетки"
 
 msgid "Modified"
 msgstr "Изменено"
@@ -443,7 +443,7 @@ msgid "Network"
 msgstr "Сеть"
 
 msgid "Never"
-msgstr ""
+msgstr "Никогда"
 
 msgid "New"
 msgstr "Новый"
@@ -565,7 +565,7 @@ msgid "Retraction Speed"
 msgstr "Скорость ретракта"
 
 msgid "Retry"
-msgstr ""
+msgstr "Повторить попытку"
 
 #, python-format
 msgid "Retry #%s"
