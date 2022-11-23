@@ -1,5 +1,6 @@
-import gi
 import logging
+
+import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango
@@ -16,59 +17,45 @@ class MovePanel(ScreenPanel):
     distances = ['.1', '.5', '1', '5', '10', '25', '50']
     distance = distances[-2]
 
-    def __init__(self, screen, title, back=True):
-        super().__init__(screen, title, back)
+    def __init__(self, screen, title):
+        super().__init__(screen, title)
         self.settings = {}
         self.menu = ['move_menu']
 
-    def home(self, widget):
-        self._screen._ws.klippy.gcode_script(KlippyGcodes.HOME)
-
-    def homexy(self, widget):
-        self._screen._ws.klippy.gcode_script(KlippyGcodes.HOME_XY)
-
-    def z_tilt(self, widget):
-        self._screen._ws.klippy.gcode_script(KlippyGcodes.Z_TILT)
-
-    def quad_gantry_level(self, widget):
-        self._screen._ws.klippy.gcode_script(KlippyGcodes.QUAD_GANTRY_LEVEL)
-
-    def initialize(self, panel_name):
-        grid = self._gtk.HomogeneousGrid()
-
-        self.labels['x+'] = self._gtk.ButtonImage("arrow-right", _("X+"), "color1")
+        self.labels['x+'] = self._gtk.Button("arrow-right", "X+", "color1")
         self.labels['x+'].connect("clicked", self.move, "X", "+")
-        self.labels['x-'] = self._gtk.ButtonImage("arrow-left", _("X-"), "color1")
+        self.labels['x-'] = self._gtk.Button("arrow-left", "X-", "color1")
         self.labels['x-'].connect("clicked", self.move, "X", "-")
 
-        self.labels['y+'] = self._gtk.ButtonImage("arrow-up", _("Y+"), "color2")
+        self.labels['y+'] = self._gtk.Button("arrow-up", "Y+", "color2")
         self.labels['y+'].connect("clicked", self.move, "Y", "+")
-        self.labels['y-'] = self._gtk.ButtonImage("arrow-down", _("Y-"), "color2")
+        self.labels['y-'] = self._gtk.Button("arrow-down", "Y-", "color2")
         self.labels['y-'].connect("clicked", self.move, "Y", "-")
 
-        self.labels['z+'] = self._gtk.ButtonImage("z-farther", _("Z+"), "color3")
+        self.labels['z+'] = self._gtk.Button("z-farther", "Z+", "color3")
         self.labels['z+'].connect("clicked", self.move, "Z", "+")
-        self.labels['z-'] = self._gtk.ButtonImage("z-closer", _("Z-"), "color3")
+        self.labels['z-'] = self._gtk.Button("z-closer", "Z-", "color3")
         self.labels['z-'].connect("clicked", self.move, "Z", "-")
 
-        self.labels['home'] = self._gtk.ButtonImage("home", _("Home All"), "color4")
+        self.labels['home'] = self._gtk.Button("home", _("Home All"), "color4")
         self.labels['home'].connect("clicked", self.home)
 
-        self.labels['home-xy'] = self._gtk.ButtonImage("home", _("Home XY"), "color4")
+        self.labels['home-xy'] = self._gtk.Button("home", _("Home XY"), "color4")
         self.labels['home-xy'].connect("clicked", self.homexy)
 
-        self.labels['z_tilt'] = self._gtk.ButtonImage("z-tilt", _("Z Tilt"), "color4")
+        self.labels['z_tilt'] = self._gtk.Button("z-tilt", _("Z Tilt"), "color4")
         self.labels['z_tilt'].connect("clicked", self.z_tilt)
 
-        self.labels['quad_gantry_level'] = self._gtk.ButtonImage("z-tilt", _("Quad Gantry Level"), "color4")
+        self.labels['quad_gantry_level'] = self._gtk.Button("z-tilt", _("Quad Gantry Level"), "color4")
         self.labels['quad_gantry_level'].connect("clicked", self.quad_gantry_level)
 
-        self.labels['motors-off'] = self._gtk.ButtonImage("motor-off", _("Disable Motors"), "color4")
+        self.labels['motors-off'] = self._gtk.Button("motor-off", _("Disable Motors"), "color4")
         script = {"script": "M18"}
         self.labels['motors-off'].connect("clicked", self._screen._confirm_send_action,
                                           _("Are you sure you wish to disable motors?"),
                                           "printer.gcode.script", script)
 
+        grid = self._gtk.HomogeneousGrid()
         if self._screen.vertical_mode:
             if self._screen.lang_ltr:
                 grid.attach(self.labels['x+'], 2, 1, 1, 1)
@@ -108,7 +95,7 @@ class MovePanel(ScreenPanel):
 
         distgrid = Gtk.Grid()
         for j, i in enumerate(self.distances):
-            self.labels[i] = self._gtk.Button(i)
+            self.labels[i] = self._gtk.Button(label=i)
             self.labels[i].set_direction(Gtk.TextDirection.LTR)
             self.labels[i].connect("clicked", self.change_distance, i)
             ctx = self.labels[i].get_style_context()
@@ -125,8 +112,8 @@ class MovePanel(ScreenPanel):
         self.labels['pos_x'] = Gtk.Label("X: 0")
         self.labels['pos_y'] = Gtk.Label("Y: 0")
         self.labels['pos_z'] = Gtk.Label("Z: 0")
-        adjust = self._gtk.ButtonImage("settings", None, "color2", 1, Gtk.PositionType.LEFT, 1)
-        adjust.connect("clicked", self.load_menu, 'options')
+        adjust = self._gtk.Button("settings", None, "color2", 1, Gtk.PositionType.LEFT, 1)
+        adjust.connect("clicked", self.load_menu, 'options', _('Settings'))
         adjust.set_hexpand(False)
         self.labels['move_dist'] = Gtk.Label(_("Move Distance (mm)"))
 
@@ -212,8 +199,7 @@ class MovePanel(ScreenPanel):
 
         dist = f"{direction}{self.distance}"
         config_key = "move_speed_z" if axis == "Z" else "move_speed_xy"
-        printer_cfg = self._config.get_printer_config(self._screen.connected_printer)
-        speed = None if printer_cfg is None else printer_cfg.getint(config_key, None)
+        speed = None if self.ks_printer_cfg is None else self.ks_printer_cfg.getint(config_key, None)
         if speed is None:
             speed = self._config.get_config()['main'].getint(config_key, 20)
         speed = 60 * max(1, speed)
@@ -282,3 +268,15 @@ class MovePanel(ScreenPanel):
             self.unload_menu()
             return True
         return False
+
+    def home(self, widget):
+        self._screen._ws.klippy.gcode_script(KlippyGcodes.HOME)
+
+    def homexy(self, widget):
+        self._screen._ws.klippy.gcode_script(KlippyGcodes.HOME_XY)
+
+    def z_tilt(self, widget):
+        self._screen._ws.klippy.gcode_script(KlippyGcodes.Z_TILT)
+
+    def quad_gantry_level(self, widget):
+        self._screen._ws.klippy.gcode_script(KlippyGcodes.QUAD_GANTRY_LEVEL)

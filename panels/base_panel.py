@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import contextlib
-import gi
 import logging
+
+import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk, Pango
@@ -13,37 +14,36 @@ from ks_includes.screen_panel import ScreenPanel
 
 
 class BasePanel(ScreenPanel):
-    def __init__(self, screen, title, back=True):
-        super().__init__(screen, title, back)
+    def __init__(self, screen, title):
+        super().__init__(screen, title)
         self.current_panel = None
         self.time_min = -1
         self.time_format = self._config.get_main_config().getboolean("24htime", True)
         self.time_update = None
+        self.titlebar_items = []
         self.titlebar_name_type = None
         self.buttons_showing = {
-            'back': not back,
             'macros_shortcut': False,
-            'printer_select': False,
-            'estop': False,
+            'printer_select': len(self._config.get_printers()) > 1,
         }
         self.current_extruder = None
         # Action bar buttons
-        self.control['back'] = self._gtk.ButtonImage('back', scale=1)
+        self.control['back'] = self._gtk.Button('back', scale=self.bts)
         self.control['back'].connect("clicked", self.back)
-        self.control['home'] = self._gtk.ButtonImage('main', scale=1)
-        self.control['home'].connect("clicked", self.menu_return, True)
+        self.control['home'] = self._gtk.Button('main', scale=self.bts)
+        self.control['home'].connect("clicked", self._screen._menu_go_home)
 
         if len(self._config.get_printers()) > 1:
-            self.control['printer_select'] = self._gtk.ButtonImage('shuffle', scale=1)
+            self.control['printer_select'] = self._gtk.Button('shuffle', scale=self.bts)
             self.control['printer_select'].connect("clicked", self._screen.show_printer_select)
 
-        self.control['macros_shortcut'] = self._gtk.ButtonImage('custom-script', scale=1)
+        self.control['macros_shortcut'] = self._gtk.Button('custom-script', scale=self.bts)
         self.control['macros_shortcut'].connect("clicked", self.menu_item_clicked, "gcode_macros", {
             "name": "Macros",
             "panel": "gcode_macros"
         })
 
-        self.control['estop'] = self._gtk.ButtonImage('emergency', scale=1)
+        self.control['estop'] = self._gtk.Button('emergency', scale=self.bts)
         self.control['estop'].connect("clicked", self.emergency_stop)
 
         # Any action bar button should close the keyboard
@@ -64,10 +64,12 @@ class BasePanel(ScreenPanel):
         self.action_bar.get_style_context().add_class('action_bar')
         self.action_bar.add(self.control['back'])
         self.action_bar.add(self.control['home'])
-        if len(self._config.get_printers()) > 1:
+        self.show_back(False)
+        if self.buttons_showing['printer_select']:
             self.action_bar.add(self.control['printer_select'])
         self.show_macro_shortcut(self._config.get_main_config().getboolean('side_macro_shortcut', True))
         self.action_bar.add(self.control['estop'])
+        self.show_estop(False)
 
         # Titlebar
 
@@ -111,10 +113,7 @@ class BasePanel(ScreenPanel):
 
         # Layout is and content are on screen_panel
         self.layout.add(self.main_grid)
-
-    def initialize(self, panel_name):
         self.update_time()
-        return
 
     def show_heaters(self, show=True):
         try:
@@ -123,14 +122,7 @@ class BasePanel(ScreenPanel):
             if not show or self._screen.printer.get_temp_store_devices() is None:
                 return
 
-            printer_cfg = self._config.get_printer_config(self._screen.connected_printer)
-            if printer_cfg is not None:
-                self.titlebar_name_type = printer_cfg.get("titlebar_name_type", None)
-            else:
-                self.titlebar_name_type = None
-            logging.info(f"Titlebar name type: {self.titlebar_name_type}")
-
-            img_size = self._gtk.img_scale * .5
+            img_size = self._gtk.img_scale * self.bts
             for device in self._screen.printer.get_temp_store_devices():
                 self.labels[device] = Gtk.Label(label="100º")
                 self.labels[device].set_ellipsize(Pango.EllipsizeMode.START)
@@ -156,21 +148,16 @@ class BasePanel(ScreenPanel):
                 n += 1
 
             # Options in the config have priority
-            if printer_cfg is not None:
-                titlebar_items = printer_cfg.get("titlebar_items", None)
-                if titlebar_items is not None:
-                    titlebar_items = [str(i.strip()) for i in titlebar_items.split(',')]
-                    logging.info(f"Titlebar items: {titlebar_items}")
-                    for device in self._screen.printer.get_temp_store_devices():
-                        # Users can fill the bar if they want
-                        if n >= nlimit + 1:
-                            break
-                        name = device.split()[1] if len(device.split()) > 1 else device
-                        for item in titlebar_items:
-                            if name == item:
-                                self.control['temp_box'].add(self.labels[f"{device}_box"])
-                                n += 1
-                                break
+            for device in self._screen.printer.get_temp_store_devices():
+                # Users can fill the bar if they want
+                if n >= nlimit + 1:
+                    break
+                name = device.split()[1] if len(device.split()) > 1 else device
+                for item in self.titlebar_items:
+                    if name == item:
+                        self.control['temp_box'].add(self.labels[f"{device}_box"])
+                        n += 1
+                        break
 
             # If there is enough space fill with heater_generic
             for device in self._screen.printer.get_temp_store_devices():
@@ -209,10 +196,10 @@ class BasePanel(ScreenPanel):
 
     def add_content(self, panel):
         self.current_panel = panel
-        self.set_title(panel.get_title())
-        self.content.add(panel.get_content())
+        self.set_title(panel.title)
+        self.content.add(panel.content)
 
-    def back(self, widget):
+    def back(self, widget=None):
         if self.current_panel is None:
             return
 
@@ -254,14 +241,12 @@ class BasePanel(ScreenPanel):
         self.content.remove(widget)
 
     def show_back(self, show=True):
-        if show is True and self.buttons_showing['back'] is False:
+        if show:
             self.control['back'].set_sensitive(True)
             self.control['home'].set_sensitive(True)
-            self.buttons_showing['back'] = True
-        elif show is False and self.buttons_showing['back'] is True:
-            self.control['back'].set_sensitive(False)
-            self.control['home'].set_sensitive(False)
-            self.buttons_showing['back'] = False
+            return
+        self.control['back'].set_sensitive(False)
+        self.control['home'].set_sensitive(False)
 
     def show_macro_shortcut(self, show=True):
         if show is True and self.buttons_showing['macros_shortcut'] is False:
@@ -277,8 +262,6 @@ class BasePanel(ScreenPanel):
             self.buttons_showing['macros_shortcut'] = False
 
     def show_printer_select(self, show=True):
-        if len(self._config.get_printers()) <= 1:
-            return
         if show and self.buttons_showing['printer_select'] is False:
             self.action_bar.add(self.control['printer_select'])
             self.action_bar.reorder_child(self.control['printer_select'], 2)
@@ -315,9 +298,18 @@ class BasePanel(ScreenPanel):
         return True
 
     def show_estop(self, show=True):
-        if show and self.buttons_showing['estop'] is False:
+        if show:
             self.control['estop'].set_sensitive(True)
-            self.buttons_showing['estop'] = True
-        elif show is False and self.buttons_showing['estop']:
-            self.control['estop'].set_sensitive(False)
-            self.buttons_showing['estop'] = False
+            return
+        self.control['estop'].set_sensitive(False)
+
+    def set_ks_printer_cfg(self, printer):
+        ScreenPanel.ks_printer_cfg = self._config.get_printer_config(printer)
+        if self.ks_printer_cfg is not None:
+            self.titlebar_name_type = self.ks_printer_cfg.get("titlebar_name_type", None)
+            titlebar_items = self.ks_printer_cfg.get("titlebar_items", None)
+            if titlebar_items is not None:
+                self.titlebar_items = [str(i.strip()) for i in titlebar_items.split(',')]
+                logging.info(f"Titlebar name type: {self.titlebar_name_type} items: {self.titlebar_items}")
+            else:
+                self.titlebar_items = []

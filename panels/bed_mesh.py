@@ -1,6 +1,7 @@
-import gi
 import logging
 import contextlib
+
+import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango
@@ -16,22 +17,19 @@ def create_panel(*args):
 
 class BedMeshPanel(ScreenPanel):
 
-    def __init__(self, screen, title, back=True):
-        super().__init__(screen, title, back)
+    def __init__(self, screen, title):
+        super().__init__(screen, title)
         self.clear = None
         self.profiles = {}
         self.show_create = False
         self.active_mesh = None
-
-    def initialize(self, panel_name):
-
-        addprofile = self._gtk.ButtonImage("increase", " " + _("Add profile"), "color1", .66, Gtk.PositionType.LEFT, 1)
+        addprofile = self._gtk.Button("increase", " " + _("Add profile"), "color1", .66, Gtk.PositionType.LEFT, 1)
         addprofile.connect("clicked", self.show_create_profile)
         addprofile.set_hexpand(True)
-        self.clear = self._gtk.ButtonImage("cancel", " " + _("Clear"), "color2", .66, Gtk.PositionType.LEFT, 1)
+        self.clear = self._gtk.Button("cancel", " " + _("Clear"), "color2", .66, Gtk.PositionType.LEFT, 1)
         self.clear.connect("clicked", self.send_clear_mesh)
         self.clear.set_hexpand(True)
-        calibrate = self._gtk.ButtonImage("refresh", " " + _("Calibrate"), "color3", .66, Gtk.PositionType.LEFT, 1)
+        calibrate = self._gtk.Button("refresh", " " + _("Calibrate"), "color3", .66, Gtk.PositionType.LEFT, 1)
         calibrate.connect("clicked", self.calibrate_mesh)
         calibrate.set_hexpand(True)
 
@@ -85,7 +83,8 @@ class BedMeshPanel(ScreenPanel):
         if profile not in self.profiles:
             self.add_profile(profile)
 
-        logging.info(f"Active {self.active_mesh} changing to {profile}")
+        if self.active_mesh != profile:
+            logging.info(f"Active {self.active_mesh} changing to {profile}")
         self.profiles[profile]['name'].set_sensitive(False)
         self.profiles[profile]['name'].get_style_context().add_class("button_active")
         self.active_mesh = profile
@@ -116,7 +115,7 @@ class BedMeshPanel(ScreenPanel):
 
     def add_profile(self, profile):
         logging.debug(f"Adding Profile: {profile}")
-        name = self._gtk.Button(f"<big><b>{profile}</b></big>")
+        name = self._gtk.Button(label=f"<big><b>{profile}</b></big>")
         name.get_children()[0].set_use_markup(True)
         name.get_children()[0].set_line_wrap(True)
         name.get_children()[0].set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
@@ -126,8 +125,8 @@ class BedMeshPanel(ScreenPanel):
         name.connect("clicked", self.update_graph, profile)
 
         buttons = {
-            "save": self._gtk.ButtonImage("complete", None, "color4", .75),
-            "delete": self._gtk.ButtonImage("cancel", None, "color2", .75),
+            "save": self._gtk.Button("complete", None, "color4", .75),
+            "delete": self._gtk.Button("cancel", None, "color2", .75),
         }
         buttons["save"].connect("clicked", self.send_save_mesh, profile)
         buttons["delete"].connect("clicked", self.send_remove_mesh, profile)
@@ -176,7 +175,6 @@ class BedMeshPanel(ScreenPanel):
 
     def load_meshes(self):
         bm_profiles = self._printer.get_stat("bed_mesh", "profiles")
-        logging.info(f"Bed profiles: {bm_profiles}")
         for prof in bm_profiles:
             if prof not in self.profiles:
                 self.add_profile(prof)
@@ -187,7 +185,6 @@ class BedMeshPanel(ScreenPanel):
     def process_update(self, action, data):
         if action == "notify_status_update":
             with contextlib.suppress(KeyError):
-                logging.info(data['bed_mesh'])
                 self.activate_mesh(data['bed_mesh']['profile_name'])
 
     def remove_create(self):
@@ -233,7 +230,7 @@ class BedMeshPanel(ScreenPanel):
             self.labels['profile_name'].connect("focus-in-event", self._show_keyboard)
             self.labels['profile_name'].grab_focus_without_selecting()
 
-            save = self._gtk.ButtonImage("complete", _("Save"), "color3")
+            save = self._gtk.Button("complete", _("Save"), "color3")
             save.set_hexpand(False)
             save.connect("clicked", self.create_profile)
 
@@ -255,10 +252,6 @@ class BedMeshPanel(ScreenPanel):
     def _show_keyboard(self, widget=None, event=None):
         self._screen.show_keyboard(entry=self.labels['profile_name'])
 
-    @staticmethod
-    def _close_dialog(widget, response):
-        widget.destroy()
-
     def create_profile(self, widget):
         name = self.labels['profile_name'].get_text()
         if self.active_mesh is None:
@@ -275,7 +268,7 @@ class BedMeshPanel(ScreenPanel):
         self._screen._ws.klippy.gcode_script("BED_MESH_CALIBRATE")
 
         # Load zcalibrate to do a manual mesh
-        if not (self._printer.config_section_exists("probe") or self._printer.config_section_exists("bltouch")):
+        if not self._screen.printer.get_probe():
             self.menu_item_clicked(widget, "refresh", {"name": _("Mesh calibrate"), "panel": "zcalibrate"})
 
     def send_clear_mesh(self, widget):

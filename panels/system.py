@@ -1,6 +1,7 @@
-import gi
 import logging
 import os
+
+import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango, GLib
@@ -27,29 +28,25 @@ ALLOWED_SERVICES = (
 
 
 class SystemPanel(ScreenPanel):
-    def __init__(self, screen, title, back=True):
-        super().__init__(screen, title, back)
+    def __init__(self, screen, title):
+        super().__init__(screen, title)
         self.refresh = None
         self.update_status = None
         self.update_dialog = None
-        self.update_prog = None
-
-    def initialize(self, panel_name):
-
         grid = self._gtk.HomogeneousGrid()
         grid.set_row_homogeneous(False)
 
-        update_all = self._gtk.ButtonImage('arrow-up', _('Full Update'), 'color1')
+        update_all = self._gtk.Button('arrow-up', _('Full Update'), 'color1')
         update_all.connect("clicked", self.show_update_info, "full")
         update_all.set_vexpand(False)
-        self.refresh = self._gtk.ButtonImage('refresh', _('Refresh'), 'color2')
+        self.refresh = self._gtk.Button('refresh', _('Refresh'), 'color2')
         self.refresh.connect("clicked", self.refresh_updates)
         self.refresh.set_vexpand(False)
 
-        reboot = self._gtk.ButtonImage('refresh', _('Restart'), 'color3')
+        reboot = self._gtk.Button('refresh', _('Restart'), 'color3')
         reboot.connect("clicked", self.reboot_poweroff, "reboot")
         reboot.set_vexpand(False)
-        shutdown = self._gtk.ButtonImage('shutdown', _('Shutdown'), 'color4')
+        shutdown = self._gtk.Button('shutdown', _('Shutdown'), 'color4')
         shutdown.connect("clicked", self.reboot_poweroff, "poweroff")
         shutdown.set_vexpand(False)
 
@@ -78,12 +75,11 @@ class SystemPanel(ScreenPanel):
                 self.labels[f"{prog}_status"].connect("clicked", self.show_update_info, prog)
 
                 if prog in ALLOWED_SERVICES:
-                    self.labels[f"{prog}_restart"] = self._gtk.ButtonImage("refresh", scale=.7)
+                    self.labels[f"{prog}_restart"] = self._gtk.Button("refresh", scale=.7)
                     self.labels[f"{prog}_restart"].connect("clicked", self.restart, prog)
                     infogrid.attach(self.labels[f"{prog}_restart"], 0, i, 1, 1)
 
                 infogrid.attach(self.labels[f"{prog}_status"], 2, i, 1, 1)
-                logging.info(f"Updating program: {prog} ")
                 self.update_program_info(prog)
 
                 infogrid.attach(self.labels[prog], 1, i, 1, 1)
@@ -102,9 +98,9 @@ class SystemPanel(ScreenPanel):
     def activate(self):
         self.get_updates()
 
-    def finish_updating(self, widget, response_id):
-        widget.destroy()
-        self._screen.set_updating(False)
+    def finish_updating(self, dialog, response_id):
+        self._screen.updating = False
+        self._gtk.remove_dialog(dialog)
         self.get_updates()
 
     def refresh_updates(self, widget=None):
@@ -126,16 +122,14 @@ class SystemPanel(ScreenPanel):
         self._screen.close_popup_message()
 
     def process_update(self, action, data):
-        if action == "notify_update_response":
-            logging.info(f"Update: {data}")
-            if 'application' in data:
-                self.labels['update_progress'].set_text(
-                    f"{self.labels['update_progress'].get_text().strip()}\n"
-                    f"{data['message']}\n"
-                )
-                if data['complete']:
-                    self.update_dialog.set_response_sensitive(Gtk.ResponseType.CANCEL, True)
-                    self.update_dialog.get_widget_for_response(Gtk.ResponseType.CANCEL).show()
+        if action == "notify_update_response" and 'application' in data:
+            self.labels['update_progress'].set_text(
+                f"{self.labels['update_progress'].get_text().strip()}\n"
+                f"{data['message']}\n"
+            )
+            if data['complete']:
+                self.update_dialog.set_response_sensitive(Gtk.ResponseType.CANCEL, True)
+                self.update_dialog.get_widget_for_response(Gtk.ResponseType.CANCEL).show()
 
     def restart(self, widget, program):
         if program not in ALLOWED_SERVICES:
@@ -204,7 +198,7 @@ class SystemPanel(ScreenPanel):
             label.set_markup((
                 f'<b>{info["package_count"]} '
                 + ngettext("Package will be updated", "Packages will be updated", info["package_count"])
-                + f':</b>\n'
+                + ':</b>\n'
             ))
             label.set_halign(Gtk.Align.CENTER)
             vbox.add(label)
@@ -241,23 +235,23 @@ class SystemPanel(ScreenPanel):
         ]
         self._gtk.Dialog(self._screen, buttons, scroll, self.update_confirm, program)
 
-    def update_confirm(self, widget, response_id, program):
+    def update_confirm(self, dialog, response_id, program):
+        self._gtk.remove_dialog(dialog)
         if response_id == Gtk.ResponseType.OK:
             logging.debug(f"Updating {program}")
             self.update_program(self, program)
-        widget.destroy()
 
-    def reset_confirm(self, widget, response_id, program):
+    def reset_confirm(self, dialog, response_id, program):
+        self._gtk.remove_dialog(dialog)
         if response_id == Gtk.ResponseType.OK:
             logging.debug(f"Recovering hard {program}")
             self.reset_repo(self, program, True)
         if response_id == Gtk.ResponseType.APPLY:
             logging.debug(f"Recovering soft {program}")
             self.reset_repo(self, program, False)
-        widget.destroy()
 
     def reset_repo(self, widget, program, hard):
-        if self._screen.is_updating():
+        if self._screen.updating:
             return
 
         buttons = [
@@ -279,16 +273,15 @@ class SystemPanel(ScreenPanel):
         dialog.set_response_sensitive(Gtk.ResponseType.CANCEL, False)
         dialog.get_widget_for_response(Gtk.ResponseType.CANCEL).hide()
 
-        self.update_prog = program
         self.update_dialog = dialog
 
         logging.info(f"Sending machine.update.recover name: {program}")
 
         self._screen._ws.send_method("machine.update.recover", {"name": program, "hard": hard})
-        self._screen.set_updating(True)
+        self._screen.updating = True
 
     def update_program(self, widget, program):
-        if self._screen.is_updating():
+        if self._screen.updating:
             return
 
         if not self.update_status:
@@ -325,7 +318,6 @@ class SystemPanel(ScreenPanel):
         dialog.set_response_sensitive(Gtk.ResponseType.CANCEL, False)
         dialog.get_widget_for_response(Gtk.ResponseType.CANCEL).hide()
 
-        self.update_prog = program
         self.update_dialog = dialog
 
         if program in ['klipper', 'moonraker', 'system', 'full']:
@@ -334,16 +326,15 @@ class SystemPanel(ScreenPanel):
         else:
             logging.info(f"Sending machine.update.client name: {program}")
             self._screen._ws.send_method("machine.update.client", {"name": program})
-        self._screen.set_updating(True)
+        self._screen.updating = True
 
     def update_program_info(self, p):
 
-        logging.info(f"Updating program: {p} ")
         if 'version_info' not in self.update_status or p not in self.update_status['version_info']:
+            logging.info(f"Unknown version: {p}")
             return
 
         info = self.update_status['version_info'][p]
-        logging.info(f"{p}: {info}")
 
         if p == "system":
             self.labels[p].set_markup("<b>System</b>")
@@ -352,7 +343,7 @@ class SystemPanel(ScreenPanel):
                 self.labels[f"{p}_status"].get_style_context().remove_class('update')
                 self.labels[f"{p}_status"].set_sensitive(False)
             else:
-                self._needs_update(p)
+                self._needs_update(p, local="", remote=info['package_count'])
 
         elif 'configured_type' in info and info['configured_type'] == 'git_repo':
             if info['is_valid'] and not info['is_dirty']:
@@ -361,7 +352,7 @@ class SystemPanel(ScreenPanel):
                     self.labels[f"{p}_status"].get_style_context().remove_class('invalid')
                 else:
                     self.labels[p].set_markup(f"<b>{p}</b>\n{info['version']} -> {info['remote_version']}")
-                    self._needs_update(p)
+                    self._needs_update(p, info['version'], info['remote_version'])
             else:
                 self.labels[p].set_markup(f"<b>{p}</b>\n{info['version']}")
                 self.labels[f"{p}_status"].set_label(_("Invalid"))
@@ -371,15 +362,17 @@ class SystemPanel(ScreenPanel):
             self._already_updated(p, info)
         else:
             self.labels[p].set_markup(f"<b>{p}</b>\n{info['version']} -> {info['remote_version']}")
-            self._needs_update(p)
+            self._needs_update(p, info['version'], info['remote_version'])
 
     def _already_updated(self, p, info):
+        logging.info(f"{p} {info['version']}")
         self.labels[p].set_markup(f"<b>{p}</b>\n{info['version']}")
         self.labels[f"{p}_status"].set_label(_("Up To Date"))
         self.labels[f"{p}_status"].get_style_context().remove_class('update')
         self.labels[f"{p}_status"].set_sensitive(False)
 
-    def _needs_update(self, p):
+    def _needs_update(self, p, local="", remote=""):
+        logging.info(f"{p} {local} -> {remote}")
         self.labels[f"{p}_status"].set_label(_("Update"))
         self.labels[f"{p}_status"].get_style_context().add_class('update')
         self.labels[f"{p}_status"].set_sensitive(True)
@@ -407,7 +400,8 @@ class SystemPanel(ScreenPanel):
         ]
         self._gtk.Dialog(self._screen, buttons, scroll, self.reboot_poweroff_confirm, method)
 
-    def reboot_poweroff_confirm(self, widget, response_id, method):
+    def reboot_poweroff_confirm(self, dialog, response_id, method):
+        self._gtk.remove_dialog(dialog)
         if response_id == Gtk.ResponseType.OK:
             if method == "reboot":
                 os.system("systemctl reboot")
@@ -418,4 +412,3 @@ class SystemPanel(ScreenPanel):
                 self._screen._ws.send_method("machine.reboot")
             else:
                 self._screen._ws.send_method("machine.shutdown")
-        widget.destroy()

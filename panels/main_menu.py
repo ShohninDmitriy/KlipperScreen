@@ -1,8 +1,9 @@
-import gi
 import logging
 
+import gi
+
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib, Pango
+from gi.repository import Gtk, GLib
 from panels.menu import MenuPanel
 
 from ks_includes.widgets.graph import HeaterGraph
@@ -14,18 +15,19 @@ def create_panel(*args):
 
 
 class MainPanel(MenuPanel):
-    def __init__(self, screen, title, back=False):
-        super().__init__(screen, title, False)
+    def __init__(self, screen, title):
+        super().__init__(screen, title)
+        self.left_panel = None
         self.items = None
-        self.grid = self._gtk.HomogeneousGrid()
-        self.grid.set_hexpand(True)
-        self.grid.set_vexpand(True)
         self.devices = {}
         self.graph_update = None
         self.active_heater = None
         self.h = 1
+        self.grid = self._gtk.HomogeneousGrid()
+        self.grid.set_hexpand(True)
+        self.grid.set_vexpand(True)
 
-    def initialize(self, panel_name, items, extrudercount):
+    def initialize(self, items):
         logging.info("### Making MainMenu")
 
         self.items = items
@@ -48,6 +50,8 @@ class MainPanel(MenuPanel):
         self.layout.show_all()
 
     def update_graph_visibility(self):
+        if self.left_panel is None:
+            return
         count = 0
         for device in self.devices:
             visible = self._config.get_config().getboolean(f"graph {self._screen.connected_printer}",
@@ -131,7 +135,7 @@ class MainPanel(MenuPanel):
         if can_target:
             self.labels['da'].add_object(device, "targets", rgb, True, False)
 
-        name = self._gtk.ButtonImage(image, devname.capitalize().replace("_", " "), None, .5, Gtk.PositionType.LEFT, 1)
+        name = self._gtk.Button(image, devname.capitalize().replace("_", " "), None, self.bts, Gtk.PositionType.LEFT, 1)
         name.connect("clicked", self.toggle_visibility, device)
         name.set_alignment(0, .5)
         visible = self._config.get_config().getboolean(f"graph {self._screen.connected_printer}", device, fallback=True)
@@ -141,7 +145,7 @@ class MainPanel(MenuPanel):
             name.get_style_context().add_class("graph_label_hidden")
         self.labels['da'].set_showing(device, visible)
 
-        temp = self._gtk.Button("")
+        temp = self._gtk.Button(label="")
         if can_target:
             temp.connect("clicked", self.show_numpad, device)
 

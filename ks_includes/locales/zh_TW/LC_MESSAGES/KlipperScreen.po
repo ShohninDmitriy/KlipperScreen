@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-12 11:20-0300\n"
+"POT-Creation-Date: 2022-11-21 21:35-0300\n"
 "PO-Revision-Date: 2022-03-31 11:25-0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -45,9 +45,6 @@ msgstr "接受"
 
 msgid "Actions"
 msgstr "動作"
-
-msgid "Add Printer"
-msgstr "新增列印機"
 
 msgid "Add profile"
 msgstr ""
@@ -112,9 +109,6 @@ msgid "Calibrated, save configuration to make it permanent"
 msgstr "校準，保存配置以使其永久化"
 
 msgid "Calibrating"
-msgstr ""
-
-msgid "Calibrating..."
 msgstr ""
 
 msgid "Can't set above the maximum:"
@@ -210,6 +204,9 @@ msgid "Estimated Time Method"
 msgstr "預估時間方法"
 
 msgid "Exclude Object"
+msgstr ""
+
+msgid "Extra Large"
 msgstr ""
 
 msgid "Extrude"
@@ -317,9 +314,6 @@ msgstr "圖標主題"
 msgid "Increase"
 msgstr "增加"
 
-msgid "Initializing"
-msgstr "初始化中"
-
 msgid "Initializing printer..."
 msgstr "初始化列印機中.."
 
@@ -400,6 +394,9 @@ msgstr "最大加速到減速"
 
 msgid "Max Velocity"
 msgstr "最大速度"
+
+msgid "Maximum"
+msgstr ""
 
 msgid "Measure Both"
 msgstr ""
@@ -558,10 +555,6 @@ msgstr ""
 msgid "Retry"
 msgstr ""
 
-#, python-format
-msgid "Retry #%s"
-msgstr "重試 #%s"
-
 msgid "Retrying"
 msgstr ""
 
@@ -712,23 +705,11 @@ msgstr "更新"
 msgid "Uploaded"
 msgstr "上傳時間"
 
-msgid "X+"
-msgstr "X+"
-
-msgid "X-"
-msgstr "X-"
-
 msgid "XY Move Speed (mm/s)"
 msgstr "XY 移動速度 (mm/s)"
 
 msgid "XY Speed (mm/s)"
 msgstr ""
-
-msgid "Y+"
-msgstr "Y+"
-
-msgid "Y-"
-msgstr "Y-"
 
 msgid "Z Calibrate"
 msgstr "Z 校準"
@@ -744,12 +725,6 @@ msgstr "Z 傾斜"
 
 msgid "Z offset:"
 msgstr ""
-
-msgid "Z+"
-msgstr "Z+"
-
-msgid "Z-"
-msgstr "Z-"
 
 msgid "commit"
 msgid_plural "commits"
@@ -773,6 +748,34 @@ msgstr "mm/s"
 
 msgid "mm/s²"
 msgstr "mm/s²"
+
+#~ msgid "Z+"
+#~ msgstr "Z+"
+
+#~ msgid "Z-"
+#~ msgstr "Z-"
+
+#~ msgid "X+"
+#~ msgstr "X+"
+
+#~ msgid "X-"
+#~ msgstr "X-"
+
+#~ msgid "Y+"
+#~ msgstr "Y+"
+
+#~ msgid "Y-"
+#~ msgstr "Y-"
+
+#, python-format
+#~ msgid "Retry #%s"
+#~ msgstr "重試 #%s"
+
+#~ msgid "Add Printer"
+#~ msgstr "新增列印機"
+
+#~ msgid "Initializing"
+#~ msgstr "初始化中"
 
 #~ msgid "Delete"
 #~ msgstr "刪除"
