@@ -123,7 +123,7 @@ class KlipperScreenConfig:
                 if locale.getdefaultlocale()[0].startswith(language):
                     logging.debug("Using system lang")
                     lang = language
-        if lang not in self.lang_list:
+        if lang is not None and lang not in self.lang_list:
             # try to match a parent
             for language in self.lang_list:
                 if lang.startswith(language):
@@ -223,7 +223,7 @@ class KlipperScreenConfig:
                     {"name": _("System") + " " + _("(default)"), "value": "system_lang"}]}},
             {"theme": {
                 "section": "main", "name": _("Icon Theme"), "type": "dropdown",
-                "value": "z-bolt", "callback": screen.restart_warning, "options": [
+                "value": "z-bolt", "callback": screen.restart_ks, "options": [
                     {"name": "Z-bolt" + " " + _("(default)"), "value": "z-bolt"}]}},
             {"print_estimate_method": {
                 "section": "main", "name": _("Estimated Time Method"), "type": "dropdown",
@@ -243,7 +243,7 @@ class KlipperScreenConfig:
                 "value": "True", "callback": screen.toggle_macro_shortcut}},
             {"font_size": {
                 "section": "main", "name": _("Font Size"), "type": "dropdown",
-                "value": "medium", "callback": screen.restart_warning, "options": [
+                "value": "medium", "callback": screen.restart_ks, "options": [
                     {"name": _("Small"), "value": "small"},
                     {"name": _("Medium") + " " + _("(default)"), "value": "medium"},
                     {"name": _("Large"), "value": "large"},
