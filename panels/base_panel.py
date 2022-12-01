@@ -31,7 +31,7 @@ class BasePanel(ScreenPanel):
         self.control['back'] = self._gtk.Button('back', scale=self.bts)
         self.control['back'].connect("clicked", self.back)
         self.control['home'] = self._gtk.Button('main', scale=self.bts)
-        self.control['home'].connect("clicked", self._screen._menu_go_home)
+        self.control['home'].connect("clicked", self._screen._menu_go_back, True)
 
         if len(self._config.get_printers()) > 1:
             self.control['printer_select'] = self._gtk.Button('shuffle', scale=self.bts)
@@ -224,12 +224,11 @@ class BasePanel(ScreenPanel):
                         try:
                             self.update_dialog.set_response_sensitive(Gtk.ResponseType.OK, True)
                             self.update_dialog.get_widget_for_response(Gtk.ResponseType.OK).show()
-                            return
                         except AttributeError:
                             logging.error("error trying to show the updater button the dialog might be closed")
-                    self._screen.updating = False
-                    for dialog in self._screen.dialogs:
-                        self._gtk.remove_dialog(dialog)
+                            self._screen.updating = False
+                            for dialog in self._screen.dialogs:
+                                self._gtk.remove_dialog(dialog)
 
         if action != "notify_status_update" or self._screen.printer is None:
             return
@@ -349,6 +348,7 @@ class BasePanel(ScreenPanel):
         dialog.connect("delete-event", self.close_update_dialog)
         dialog.set_response_sensitive(Gtk.ResponseType.OK, False)
         dialog.get_widget_for_response(Gtk.ResponseType.OK).hide()
+        dialog.set_title(_("Updating"))
         self.update_dialog = dialog
         self._screen.updating = True
 
@@ -358,11 +358,11 @@ class BasePanel(ScreenPanel):
         logging.info("Finishing update")
         self._screen.updating = False
         self._gtk.remove_dialog(dialog)
-        self._screen._menu_go_home()
+        self._screen._menu_go_back(home=True)
 
     def close_update_dialog(self, *args):
         logging.info("Closing update dialog")
         if self.update_dialog in self._screen.dialogs:
             self._screen.dialogs.remove(self.update_dialog)
         self.update_dialog = None
-        self._screen._menu_go_home()
+        self._screen._menu_go_back(home=True)
