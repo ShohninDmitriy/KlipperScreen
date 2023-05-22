@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-05-07 07:02-0600\n"
-"PO-Revision-Date: 2022-11-30 18:15-0300\n"
+"PO-Revision-Date: 2023-05-22 10:01+0300\n"
 "Last-Translator: Jakob Kais <schpuntik@freenet.de>\n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"X-Generator: Poedit 3.2.1\n"
+"X-Generator: Poedit 3.0\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
 #, python-format
@@ -55,11 +55,11 @@ msgstr "Применить"
 
 #, python-format
 msgid "Apply %s%.3f offset to Endstop?"
-msgstr ""
+msgstr "Применить смещение %s%.3f к Endstop?"
 
 #, python-format
 msgid "Apply %s%.3f offset to Probe?"
-msgstr ""
+msgstr "Применить смещение %s%.3f к зонду?"
 
 msgid "Are you sure do you want to exclude the object?"
 msgstr "Вы уверены, что хотите исключить объект?"
@@ -110,7 +110,7 @@ msgid "Calibrating"
 msgstr "Калибровка"
 
 msgid "Camera"
-msgstr ""
+msgstr "Камера"
 
 msgid "Can't set above the maximum:"
 msgstr "Невозможно установить выше максимума:"
@@ -174,7 +174,7 @@ msgid "Date"
 msgstr "Дата"
 
 msgid "Delete Directory?"
-msgstr ""
+msgstr "Удалить каталог?"
 
 msgid "Delete File?"
 msgstr "Удалить Файл?"
@@ -268,7 +268,7 @@ msgid "Full Update"
 msgstr "Полный Обновлять"
 
 msgid "Fullscreen"
-msgstr ""
+msgstr "Полный экран"
 
 msgid "Go Back"
 msgstr "Назад"
@@ -328,7 +328,7 @@ msgid "Invalid"
 msgstr "Неверный"
 
 msgid "Invalid password"
-msgstr ""
+msgstr "Неверный пароль"
 
 msgid "Invert X"
 msgstr "Инверсия X"
@@ -528,7 +528,7 @@ msgid "Profile Name:"
 msgstr "Имя профиля:"
 
 msgid "Provide KlipperScreen.log when asking for help.\n"
-msgstr ""
+msgstr "Предоставьте KlipperScreen.log при обращении за помощью.\n"
 
 msgid "Quad Gantry Level"
 msgstr "Уровень Quad Gantry"
@@ -552,7 +552,7 @@ msgid "Refresh"
 msgstr "Обновить"
 
 msgid "Rename/Move:"
-msgstr ""
+msgstr "Переименовать/переместить:"
 
 msgid "Restart"
 msgstr "Перезагрузка"
@@ -752,7 +752,7 @@ msgstr[2] "часа"
 
 msgid "minute"
 msgid_plural "minutes"
-msgstr[0] ""
+msgstr[0] "минута"
 msgstr[1] ""
 msgstr[2] ""
 
