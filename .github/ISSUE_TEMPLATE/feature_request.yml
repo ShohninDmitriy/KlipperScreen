@@ -1,18 +1,16 @@
 name: Feature request
-about: Suggest an idea for this project
+description: Suggest an idea for this project
 title: "[FR] <title>"
-labels: ''
-assignees: ''
 body:
   - type: markdown
     attributes:
       value: >-
         ## Thank you for choosing KlipperScreen
 
-        #### This form is for feature request of KlipperScreen
+        This form is for feature requests of KlipperScreen
 
         #### This is an Open Source project developed voluntarily, there are no Warranties, or ETA.
-        #### [LICENSE](https://github.com/KlipperScreen/KlipperScreen/blob/master/LICENSE)
+        [License](https://github.com/KlipperScreen/KlipperScreen/blob/master/LICENSE)
 
   - type: textarea
     id: solution
@@ -31,7 +29,7 @@ body:
   - type: textarea
     id: alternative
     attributes:
-      label: 'Describe alternatives you've considered'
+      label: 'Describe alternatives you have considered'
       description: A clear and concise description of any alternative solutions or features you've considered.
     validations:
       required: false
