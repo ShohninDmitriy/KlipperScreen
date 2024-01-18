@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import gc
 import json
 import logging
 import os
@@ -204,24 +205,25 @@ class KlipperScreen(Gtk.Window):
 
     def connect_printer(self, name):
         self.connecting_to_printer = name
+        if self.files:
+            self.files.__init__(self)
+        gc.collect()
         if self._ws is not None and self._ws.connected:
             self._ws.close()
             self.connected_printer = None
             self.printer.state = "disconnected"
-            if self.files:
-                self.files.reset()
-                self.files = None
-
         self.connecting = True
         self.initialized = False
 
-        ind = 0
         logging.info(f"Connecting to printer: {name}")
-        for printer in self.printers:
-            if name == list(printer)[0]:
-                ind = self.printers.index(printer)
-                break
-
+        ind = next(
+            (
+                self.printers.index(printer)
+                for printer in self.printers
+                if name == list(printer)[0]
+            ),
+            0,
+        )
         self.printer = self.printers[ind]["data"]
         self.apiclient = KlippyRest(
             self.printers[ind][name]["moonraker_host"],
@@ -240,8 +242,8 @@ class KlipperScreen(Gtk.Window):
                                    self.printers[ind][name]["moonraker_host"],
                                    self.printers[ind][name]["moonraker_port"],
                                    )
-
-        self.files = KlippyFiles(self)
+        if self.files is None:
+            self.files = KlippyFiles(self)
         self._ws.initial_connect()
 
     def ws_subscribe(self):
@@ -271,6 +273,10 @@ class KlipperScreen(Gtk.Window):
                 "target", "temperature", "pressure_advance", "smooth_time", "power"]
         for h in self.printer.get_heaters():
             requested_updates['objects'][h] = ["target", "temperature", "power"]
+        for t in self.printer.get_temp_sensors():
+            requested_updates['objects'][t] = ["temperature"]
+        for f in self.printer.get_temp_fans():
+            requested_updates['objects'][f] = ["target", "temperature"]
         for f in self.printer.get_fans():
             requested_updates['objects'][f] = ["speed"]
         for f in self.printer.get_filament_sensors():
@@ -419,6 +425,7 @@ class KlipperScreen(Gtk.Window):
     def restart_ks(self, *args):
         logging.debug(f"Restarting {sys.executable} {' '.join(sys.argv)}")
         os.execv(sys.executable, ['python'] + sys.argv)
+        # noinspection PyUnreachableCode
         self._ws.send_method("machine.services.restart", {"service": "KlipperScreen"})  # Fallback
 
     def init_style(self):
@@ -654,8 +661,6 @@ class KlipperScreen(Gtk.Window):
         self.printer.state = "disconnected"
         self.connecting = True
         self.connected_printer = None
-        self.files.reset()
-        self.files = None
         self.initialized = False
         self.connect_printer(self.connecting_to_printer)
 
@@ -741,11 +746,14 @@ class KlipperScreen(Gtk.Window):
             return
         elif action == "notify_klippy_shutdown":
             self.printer.process_update({'webhooks': {'state': "shutdown"}})
+            return
         elif action == "notify_klippy_ready":
             if not self.initialized:
-                logging.debug("Still not initialized")
+                self.reinit_count = 0
+                self._init_printer("Reconnecting", klipper=True)
                 return
             self.printer.process_update({'webhooks': {'state': "ready"}})
+            return
         elif action == "notify_status_update" and self.printer.state != "shutdown":
             self.printer.process_update(data)
             if 'manual_probe' in data and data['manual_probe']['is_active'] and 'zcalibrate' not in self._cur_panels:
@@ -753,8 +761,10 @@ class KlipperScreen(Gtk.Window):
         elif action == "notify_filelist_changed":
             if self.files is not None:
                 self.files.process_update(data)
+            return
         elif action == "notify_metadata_update":
             self.files.request_metadata(data['filename'])
+            return
         elif action == "notify_update_response":
             if 'message' in data and 'Error' in data['message']:
                 logging.error(f"{action}:{data['message']}")
@@ -956,7 +966,9 @@ class KlipperScreen(Gtk.Window):
         self.ws_subscribe()
         extra_items = (self.printer.get_tools()
                        + self.printer.get_heaters()
+                       + self.printer.get_temp_sensors()
                        + self.printer.get_fans()
+                       + self.printer.get_temp_fans()
                        + self.printer.get_filament_sensors()
                        + self.printer.get_output_pins()
                        + self.printer.get_leds()
@@ -969,7 +981,7 @@ class KlipperScreen(Gtk.Window):
         if len(self.printer.get_temp_devices()) > 0:
             self.init_tempstore()
 
-        self.files.initialize()
+        self.files.set_gcodes_path()
         self.files.refresh_files()
 
         logging.info("Printer initialized")

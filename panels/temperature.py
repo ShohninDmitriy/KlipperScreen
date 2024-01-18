@@ -29,7 +29,7 @@ class Panel(ScreenPanel):
 
         # When printing start in temp_delta mode and only select tools
         selection = []
-        if self._printer.state not in ["printing", "paused"]:
+        if self._printer.state not in ("printing", "paused"):
             self.show_preheat = True
             selection.extend(self._printer.get_temp_devices())
         elif extra:
@@ -103,14 +103,9 @@ class Panel(ScreenPanel):
             self.labels[f'deg{i}'] = self._gtk.Button(label=i)
             self.labels[f'deg{i}'].connect("clicked", self.change_temp_delta, i)
             ctx = self.labels[f'deg{i}'].get_style_context()
-            if j == 0:
-                ctx.add_class("distbutton_top")
-            elif j == len(self.tempdeltas) - 1:
-                ctx.add_class("distbutton_bottom")
-            else:
-                ctx.add_class("distbutton")
+            ctx.add_class("horizontal_togglebuttons")
             if i == self.tempdelta:
-                ctx.add_class("distbutton_active")
+                ctx.add_class("horizontal_togglebuttons_active")
             tempgrid.attach(self.labels[f'deg{i}'], j, 0, 1, 1)
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -125,8 +120,8 @@ class Panel(ScreenPanel):
 
     def change_temp_delta(self, widget, tempdelta):
         logging.info(f"### tempdelta {tempdelta}")
-        self.labels[f"deg{self.tempdelta}"].get_style_context().remove_class("distbutton_active")
-        self.labels[f"deg{tempdelta}"].get_style_context().add_class("distbutton_active")
+        self.labels[f"deg{self.tempdelta}"].get_style_context().remove_class("horizontal_togglebuttons_active")
+        self.labels[f"deg{tempdelta}"].get_style_context().add_class("horizontal_togglebuttons_active")
         self.tempdelta = tempdelta
 
     def change_target_temp_incremental(self, widget, direction):
@@ -528,7 +523,7 @@ class Panel(ScreenPanel):
 
         if "keypad" not in self.labels:
             self.labels["keypad"] = Keypad(self._screen, self.change_target_temp, self.pid_calibrate, self.hide_numpad)
-        can_pid = self._printer.state not in ["printing", "paused"] \
+        can_pid = self._printer.state not in ("printing", "paused") \
             and self._screen.printer.config[self.active_heater]['control'] == 'pid'
         self.labels["keypad"].show_pid(can_pid)
         self.labels["keypad"].clear()
