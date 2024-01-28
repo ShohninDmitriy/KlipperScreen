@@ -105,6 +105,7 @@ class KlipperScreen(Gtk.Window):
         except Exception as e:
             logging.exception(f"{e}\n\n{traceback.format_exc()}")
             raise RuntimeError from e
+        GLib.set_prgname('KlipperScreen')
         self.blanking_time = 600
         self.use_dpms = True
         self.apiclient = None
@@ -653,6 +654,7 @@ class KlipperScreen(Gtk.Window):
         self.show_panel("printer_select", _("Printer Select"), remove_all=True)
 
     def websocket_disconnected(self, msg):
+        logging.debug("### websocket_disconnected")
         self.printer_initializing(msg, remove=True)
         self.printer.state = "disconnected"
         self.connecting = True
@@ -662,6 +664,7 @@ class KlipperScreen(Gtk.Window):
 
     def state_disconnected(self):
         logging.debug("### Going to disconnected")
+        self.printer.stop_tempstore_updates()
         self.close_screensaver()
         self.initialized = False
         self.reinit_count = 0
@@ -703,6 +706,7 @@ class KlipperScreen(Gtk.Window):
 
     def state_shutdown(self):
         self.close_screensaver()
+        self.printer.stop_tempstore_updates()
         msg = self.printer.get_stat("webhooks", "state_message")
         msg = msg if "ready" not in msg else ""
         self.printer_initializing(_("Klipper has shutdown") + "\n\n" + msg, remove=True)
@@ -976,8 +980,6 @@ class KlipperScreen(Gtk.Window):
                                                                                extra_items))
         if data is False:
             return self._init_printer("Error getting printer object data with extra items")
-        if len(self.printer.get_temp_devices()) > 0:
-            self.init_tempstore()
 
         self.files.set_gcodes_path()
         self.files.refresh_files()
@@ -991,6 +993,8 @@ class KlipperScreen(Gtk.Window):
         return False
 
     def init_tempstore(self):
+        if len(self.printer.get_temp_devices()) == 0:
+            return
         tempstore = self.apiclient.send_request("server/temperature_store")
         if tempstore and 'result' in tempstore and tempstore['result']:
             self.printer.init_temp_store(tempstore['result'])
@@ -1096,7 +1100,8 @@ def main():
     homedir = os.path.expanduser("~")
 
     parser.add_argument(
-        "-c", "--configfile", default=os.path.join(homedir, "KlipperScreen.conf"), metavar='<configfile>',
+        "-c", "--configfile",
+        default="", metavar='<configfile>',
         help="Location of KlipperScreen configuration file"
     )
     logdir = os.path.join(homedir, "printer_data", "logs")
