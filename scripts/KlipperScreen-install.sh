@@ -88,10 +88,6 @@ install_packages()
         echo_error "Installation of Misc packages failed ($MISC)"
         exit 1
     fi
-#     ModemManager interferes with klipper comms
-#     on buster it's installed as a dependency of mpv
-#     it doesn't happen on bullseye
-    sudo systemctl mask ModemManager.service
 }
 
 check_requirements()
@@ -109,21 +105,27 @@ create_virtualenv()
     echo_text "Creating virtual environment"
     if [ ! -d ${KSENV} ]; then
         virtualenv -p /usr/bin/python3 ${KSENV}
-#         GET_PIP="${HOME}/get-pip.py"
-#         virtualenv --no-pip -p /usr/bin/python3 ${KSENV}
-#         curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o ${GET_PIP}
-#         ${KSENV}/bin/python ${GET_PIP}
-#         rm ${GET_PIP}
     fi
 
     source ${KSENV}/bin/activate
-    pip --disable-pip-version-check install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+    if [[ "$(uname -m)" =~ armv[67]l ]]; then
+        echo_text "Using armv[67]l! Adding piwheels.org as extra index..."
+        pip --disable-pip-version-check install --extra-index-url https://www.piwheels.org/simple -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+    else
+        pip --disable-pip-version-check install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+    fi
     if [ $? -gt 0 ]; then
         echo_error "Error: pip install exited with status code $?"
         echo_text "Trying again with new tools..."
         sudo apt-get install -y build-essential cmake
-        pip install --upgrade pip setuptools
-        pip install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+        if [[ "$(uname -m)" =~ armv[67]l ]]; then
+            echo_text "Adding piwheels.org as extra index..."
+            pip install --extra-index-url https://www.piwheels.org/simple --upgrade pip setuptools
+            pip install --extra-index-url https://www.piwheels.org/simple -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+        else
+            pip install --upgrade pip setuptools
+            pip install -r ${KSPATH}/scripts/KlipperScreen-requirements.txt
+        fi
         if [ $? -gt 0 ]; then
             echo_error "Unable to install dependencies, aborting install."
             deactivate
@@ -151,6 +153,7 @@ install_systemd_service()
     sudo systemctl daemon-reload
     sudo systemctl enable KlipperScreen
     sudo systemctl set-default multi-user.target
+    sudo adduser $USER tty
 }
 
 create_policy()
@@ -160,8 +163,7 @@ create_policy()
 
     echo_text "Installing KlipperScreen PolicyKit Rules"
     sudo groupadd -f klipperscreen
-    sudo groupadd -f netdev
-    sudo groupadd -f tty
+    sudo adduser $USER netdev
     if [ ! -x "$(command -v pkaction)" ]; then
         echo "PolicyKit not installed"
         return
@@ -233,14 +235,11 @@ EOF
 
 update_x11()
 {
-    if [ -e /etc/X11/Xwrapper.config ]
-    then
-        echo_text "Updating X11 Xwrapper"
-        sudo sed -i 's/allowed_users=console/allowed_users=anybody/g' /etc/X11/Xwrapper.config
-    else
-        echo_text "Adding X11 Xwrapper"
-        echo 'allowed_users=anybody' | sudo tee /etc/X11/Xwrapper.config
-    fi
+    echo_text "Adding X11 Xwrapper"
+    sudo /bin/sh -c "cat >  /etc/X11/Xwrapper.config" << EOF
+allowed_users=anybody
+needs_root_rights=yes
+EOF
 }
 
 fix_fbturbo()
