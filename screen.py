@@ -707,6 +707,7 @@ class KlipperScreen(Gtk.Window):
             logging.debug("Printer not initialized yet")
             self.printer.state = "not ready"
             return
+        self.files.refresh_files()
         self.show_panel("main_menu", None, remove_all=True, items=self._config.get_menu_items("__main"))
 
     def state_startup(self):
@@ -988,7 +989,6 @@ class KlipperScreen(Gtk.Window):
             return self._init_printer("Error getting printer object data with extra items")
 
         self.files.set_gcodes_path()
-        self.files.refresh_files()
 
         logging.info("Printer initialized")
         self.initialized = True
@@ -1008,6 +1008,9 @@ class KlipperScreen(Gtk.Window):
                 self.panels[self._cur_panels[-1]].update_graph_visibility()
         else:
             logging.error(f'Tempstore not ready: {tempstore} Retrying in 5 seconds')
+            GLib.timeout_add_seconds(5, self.init_tempstore)
+            return
+        if set(self.printer.tempstore) != set(self.printer.get_temp_devices()):
             GLib.timeout_add_seconds(5, self.init_tempstore)
             return
         server_config = self.apiclient.send_request("server/config")
