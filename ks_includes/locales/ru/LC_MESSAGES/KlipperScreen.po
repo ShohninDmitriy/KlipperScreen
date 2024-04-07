@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-04-03 14:35-0300\n"
-"PO-Revision-Date: 2023-12-28 12:05+0000\n"
+"PO-Revision-Date: 2024-04-07 06:55+0300\n"
 "Last-Translator: Dr_Perry_Coke <dr.perrycoke@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/klipperscreen/"
 "klipperscreen/ru/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Weblate 5.4-dev\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
 #, python-format
@@ -108,7 +108,7 @@ msgid "Bed screw configuration:"
 msgstr "Конфигурация винтов кровати:"
 
 msgid "Both"
-msgstr ""
+msgstr "Оба"
 
 msgid "Calibrate"
 msgstr "Калибровка"
@@ -203,7 +203,7 @@ msgid "Elapsed:"
 msgstr "Прошло:"
 
 msgid "Emergency Stop"
-msgstr ""
+msgstr "Аварийная остановка"
 
 msgid "Ended official support in June 2023"
 msgstr "Официальная поддержка прекращена в июне 2023 г"
@@ -212,19 +212,19 @@ msgid "Error"
 msgstr "Ошибка"
 
 msgid "Error clearing active spool"
-msgstr ""
+msgstr "Ошибка при очистке активной катушки"
 
 msgid "Error getting active spool"
-msgstr ""
+msgstr "Ошибка при получении активной катушки"
 
 msgid "Error setting active spool"
-msgstr ""
+msgstr "Ошибка настройки активной катушки"
 
 msgid "Error trying to fetch spools"
-msgstr ""
+msgstr "Ошибка про получении списка катушек"
 
 msgid "Error: Couldn't get a position to probe"
-msgstr ""
+msgstr "Ошибка: Не удалось получить позицию для зондирования"
 
 msgid "Estimated Time Method"
 msgstr "Расчётное время"
@@ -239,7 +239,7 @@ msgid "Extrude"
 msgstr "Заправить"
 
 msgid "Extruders"
-msgstr ""
+msgstr "Экструдеры"
 
 msgid "Extrusion +"
 msgstr "Экструзия +"
@@ -430,7 +430,7 @@ msgid "Loading..."
 msgstr "Загрузка..."
 
 msgid "Lost Connection to Moonraker"
-msgstr ""
+msgstr "Утраченная связь с Moonraker"
 
 msgid "Lower Nozzle"
 msgstr "Опустить сопло"
@@ -478,7 +478,7 @@ msgid "Mesh calibrate"
 msgstr "Калибровка сетки"
 
 msgid "Minimum Cruise Ratio"
-msgstr ""
+msgstr "Минимальная круизная скорость"
 
 msgid "Modified"
 msgstr "Изменено"
@@ -511,10 +511,10 @@ msgid "No elegible macros:"
 msgstr "Нет понятных макросов:"
 
 msgid "No mesh has been loaded"
-msgstr ""
+msgstr "Ни одна сетка не была загружена"
 
 msgid "No wireless interface has been found"
-msgstr ""
+msgstr "Беспроводной интерфейс не найден"
 
 msgid ""
 "Not supported for auto-detection, it needs to be configured in klipperscreen."
