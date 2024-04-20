@@ -57,8 +57,9 @@ moonraker_port: 7125
 # Define the z_babystep intervals in a CSV list. Currently only 2 are supported, the last value is default
 # z_babystep_values: 0.01, 0.05
 
+# For the 'Power on' button on the splash screen:
 # Define one or more moonraker power devices that turn on this printer (CSV list)
-# Default is the printer name
+# By Default it tries to match the printer name defined in this section header to the moonraker power device name.
 # power_devices: example1, example2
 
 # Define what items should be shown in titlebar besides the extruder and bed
@@ -71,18 +72,11 @@ moonraker_port: 7125
 # titlebar_name_type: None
 
 # Z probe calibrate position
-# By default is the middle of the bed
+# By default it tries to guess the correct location
+# it will try using zero reference position, safe_z, mesh midddle, middle of axis length, etc
 # example:
 # calibrate_x_position: 100
 # calibrate_y_position: 100
-
-
-# Bed Screws
-# define the screw positons required for odd number of screws in a comma separated list (CSV)
-# possible values are: bl, br, bm, fl, fr, fm, lm, rm, center
-# they correspond to back-left, back-right, back-middle, front-left, front-right, front-middle, left-middle, right-middle
-# example:
-# screw_positions: bl, br, fm
 
 # Rotation is useful if the screen is not directly in front of the machine.
 # It will affect the bed mesh visualization.
