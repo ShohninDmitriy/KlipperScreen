@@ -21,7 +21,6 @@ class Panel(ScreenPanel):
             "type": "menu",
             "menu": "lang"
         }})
-
         self.labels['settings_menu'] = self._gtk.ScrolledWindow()
         self.labels['settings'] = Gtk.Grid()
         self.labels['settings_menu'].add(self.labels['settings'])
@@ -32,7 +31,7 @@ class Panel(ScreenPanel):
         self.labels['lang_menu'] = self._gtk.ScrolledWindow()
         self.labels['lang'] = Gtk.Grid()
         self.labels['lang_menu'].add(self.labels['lang'])
-        for lang in self._config.lang_list:
+        for lang in ["system_lang", *self._config.lang_list]:
             self.langs[lang] = {
                 "name": lang,
                 "type": "button",
@@ -55,13 +54,3 @@ class Panel(ScreenPanel):
             self.add_option("printers", self.printers, pname, self.printers[pname])
 
         self.content.add(self.labels['settings_menu'])
-
-    def activate(self):
-        while len(self.menu) > 1:
-            self.unload_menu()
-
-    def back(self):
-        if len(self.menu) > 1:
-            self.unload_menu()
-            return True
-        return False
