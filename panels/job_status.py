@@ -481,6 +481,7 @@ class Panel(ScreenPanel):
                     self._printer.get_stat(x, "temperature"),
                     self._printer.get_stat(x, "target"),
                     self._printer.get_stat(x, "power"),
+                    digits=0
                 )
                 if x in self.buttons['extruder']:
                     self.buttons['extruder'][x].set_label(self.labels[x].get_text())
@@ -780,6 +781,8 @@ class Panel(ScreenPanel):
         self.update_file_metadata()
 
     def animate_label(self):
+        if not self.filename_label:
+            return False
         ellipsized = self.labels['file'].get_layout().is_ellipsized()
         if ellipsized:
             self.filename_label['current'] = self.filename_label['current'][2:]
