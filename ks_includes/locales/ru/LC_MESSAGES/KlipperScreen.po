@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-02 08:38-0300\n"
-"PO-Revision-Date: 2024-04-13 16:48+0000\n"
+"PO-Revision-Date: 2024-06-04 09:56+0300\n"
 "Last-Translator: Dr_Perry_Coke <dr.perrycoke@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/klipperscreen/"
 "klipperscreen/ru/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Weblate 5.5-dev\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
 #, python-format
@@ -72,7 +72,7 @@ msgid "Are you sure you want to run Emergency Stop?"
 msgstr "Вы уверены, что хотите запустить аварийную остановку?"
 
 msgid "Are you sure you want to stop the calibration?"
-msgstr ""
+msgstr "Вы уверены, что хотите остановить калибровку?"
 
 msgid "Are you sure you wish to cancel this print?"
 msgstr "Вы хотите отменить эту печать?"
@@ -87,7 +87,7 @@ msgid "Are you sure you wish to shutdown the system?"
 msgstr "Вы хотите выключить принтер?"
 
 msgid "Asks for confirmation before stopping"
-msgstr ""
+msgstr "Просит подтверждения, прежде чем остановиться"
 
 msgid "Auto"
 msgstr "Авто"
@@ -423,7 +423,7 @@ msgid "Invalid password"
 msgstr "Неверный пароль"
 
 msgid "Inversely affects the icon size"
-msgstr ""
+msgstr "Обратное влияние на размер иконки"
 
 msgid "Invert X"
 msgstr "Инверсия X"
@@ -438,7 +438,7 @@ msgid "It may take more than 5 minutes depending on the heater power."
 msgstr "В зависимости от мощности нагревателя это может занять более 5 минут."
 
 msgid "It's possible that the configuration is not correct"
-msgstr ""
+msgstr "Возможно, конфигурация неверна"
 
 msgid "Klipper Restart"
 msgstr "Klipper Рестарт"
@@ -793,7 +793,7 @@ msgid "Show Scrollbars Buttons"
 msgstr "Показать полосу прокрутки"
 
 msgid "Show only devices that are able to be set"
-msgstr ""
+msgstr "Показать только те устройства, которые можно установить"
 
 msgid "Shutdown"
 msgstr "Выключить"
@@ -839,6 +839,8 @@ msgstr "Запуск обновления для"
 
 msgid "Swaps buttons if they are on top of each other, affects other panels"
 msgstr ""
+"Меняет местами кнопки, если они находятся друг над другом, влияет на другие "
+"панели"
 
 msgid "System"
 msgstr "Система"
@@ -859,7 +861,7 @@ msgid "Temperature"
 msgstr "Tемпература"
 
 msgid "The system doesn't meet the minimum requirement"
-msgstr ""
+msgstr "Система не соответствует минимальным требованиям"
 
 msgid "This panel supports up-to 9 screws in a 3x3 Grid"
 msgstr ""
@@ -904,7 +906,7 @@ msgid "Uploaded"
 msgstr "Загружено"
 
 msgid "Useful for un-responsive touchscreens"
-msgstr ""
+msgstr "Пригодится для невосприимчивых сенсорных экранов"
 
 msgid "WebRTC is not supported by the backend trying Stream"
 msgstr ""
