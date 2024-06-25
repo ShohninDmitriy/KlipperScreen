@@ -150,9 +150,10 @@ button.invalid {
     font-weight: bold;
 }
 
-combobox box button {
-    border: .05em solid @lines;
-    padding: .5em 1em;
+combobox button {
+    border: .05em solid @bg;
+    padding: 0 0.7em;
+    border-radius: 0.7em;
 }
 
 combobox arrow {
@@ -479,7 +480,7 @@ trough {
 .printing-filename {
     font-size: 1.4em;
     font-weight: bold;
-    margin: .25em .25em 0 0;
+    margin-right: .25em;
 }
 
 .printing-info {
@@ -497,7 +498,7 @@ trough {
 
 .printing-status {
     font-style: italic;
-    margin: 0;
+    margin-right: .25em;
     font-weight: bold;
 }
 
@@ -608,7 +609,7 @@ trough progress {
 
 .graph_label {border-left-width: .4em; border-left-style: solid;}
 
-button.graph_label {padding-left: 0.15em;}
+button.graph_label {padding-left: 0.25em;}
 
 .dialog-error {
     border-bottom: .4em solid @error;
@@ -632,6 +633,12 @@ button.graph_label {padding-left: 0.15em;}
 
 .dialog-primary {
     border-bottom: .4em solid @color1;
+}
+
+.dialog .image-button {
+    background-color: transparent;
+    padding: 0;
+    margin: 0.25em;
 }
 
 flowboxchild {

@@ -82,14 +82,14 @@ class Panel(ScreenPanel):
 
         self.labels['file'] = Gtk.Label(label="Filename", hexpand=True)
         self.labels['file'].get_style_context().add_class("printing-filename")
-        self.labels['lcdmessage'] = Gtk.Label()
+        self.labels['lcdmessage'] = Gtk.Label(no_show_all=True)
         self.labels['lcdmessage'].get_style_context().add_class("printing-status")
 
         for label in self.labels:
             self.labels[label].set_halign(Gtk.Align.START)
             self.labels[label].set_ellipsize(Pango.EllipsizeMode.END)
 
-        fi_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        fi_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10, valign=Gtk.Align.CENTER)
         fi_box.add(self.labels['file'])
         fi_box.add(self.labels['lcdmessage'])
         self.grid.attach(fi_box, 1, 0, 3, 1)
@@ -362,22 +362,21 @@ class Panel(ScreenPanel):
     def save_offset(self, widget, device):
         sign = "+" if self.zoffset > 0 else "-"
         label = Gtk.Label(hexpand=True, vexpand=True, wrap=True)
+        saved_z_offset = None
+        msg = f"Apply {sign}{abs(self.zoffset)} offset to {device}?"
         if device == "probe":
-            probe = self._printer.get_probe()
-            saved_z_offset = probe['z_offset'] if probe else "?"
-            label.set_label(_("Apply %s%.3f offset to Probe?") % (sign, abs(self.zoffset))
-                            + "\n\n"
-                            + _("Saved offset: %s") % saved_z_offset)
+            msg = _("Apply %s%.3f offset to Probe?") % (sign, abs(self.zoffset))
+            if probe := self._printer.get_probe():
+                saved_z_offset = probe['z_offset']
         elif device == "endstop":
-            saved_z_offset = None
             msg = _("Apply %s%.3f offset to Endstop?") % (sign, abs(self.zoffset))
             if 'stepper_z' in self._printer.get_config_section_list():
                 saved_z_offset = self._printer.get_config_section('stepper_z')['position_endstop']
             elif 'stepper_a' in self._printer.get_config_section_list():
                 saved_z_offset = self._printer.get_config_section('stepper_a')['position_endstop']
-            if saved_z_offset:
-                msg += "\n\n" + _("Saved offset: %s") % saved_z_offset
-            label.set_label(msg)
+        if saved_z_offset:
+            msg += "\n\n" + _("Saved offset: %s") % saved_z_offset
+        label.set_label(msg)
         buttons = [
             {"name": _("Apply"), "response": Gtk.ResponseType.APPLY, "style": 'dialog-default'},
             {"name": _("Cancel"), "response": Gtk.ResponseType.CANCEL, "style": 'dialog-error'}
@@ -486,9 +485,11 @@ class Panel(ScreenPanel):
                     self.buttons['heater'][x].set_label(self.labels[x].get_text())
 
         if "display_status" in data and "message" in data["display_status"]:
-            self.labels['lcdmessage'].set_label(
-                f"{data['display_status']['message'] if data['display_status']['message'] is not None else ''}"
-            )
+            if data['display_status']['message']:
+                self.labels['lcdmessage'].set_label(f"{data['display_status']['message']}")
+                self.labels['lcdmessage'].show()
+            else:
+                self.labels['lcdmessage'].hide()
 
         if 'toolhead' in data:
             if 'extruder' in data['toolhead'] and data['toolhead']['extruder'] != self.current_extruder:
@@ -630,7 +631,9 @@ class Panel(ScreenPanel):
         elif timeleft_type == "slicer":
             estimated = slicer_time
         elif estimated < 1:  # Auto
-            if print_duration < slicer_time > 1:
+            if "last_time" in self.file_metadata:
+                estimated = self.file_metadata['last_time']
+            elif print_duration < slicer_time > 1:
                 if progress < 0.15:
                     # At the begining file and filament are innacurate
                     estimated = slicer_time
@@ -816,6 +819,10 @@ class Panel(ScreenPanel):
                     self.labels['total_layers'].set_label(f"{((self.oheight - self.f_layer_h) / self.layer_h) + 1:.0f}")
             if "filament_total" in self.file_metadata:
                 self.labels['filament_total'].set_label(f"{float(self.file_metadata['filament_total']) / 1000:.1f} m")
+            if "job_id" in self.file_metadata and self.file_metadata['job_id']:
+                history = self._screen.apiclient.send_request(f"server/history/job?uid={self.file_metadata['job_id']}")
+                if history and history['job']['status'] == "completed" and history['job']['print_duration']:
+                    self.file_metadata["last_time"] = history['job']['print_duration']
         elif not response:
             logging.debug("Cannot find file metadata. Listening for updated metadata")
             self._files.request_metadata(self.filename)
