@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-02 08:38-0300\n"
-"PO-Revision-Date: 2024-06-04 09:56+0300\n"
+"POT-Creation-Date: 2024-06-27 18:24-0300\n"
+"PO-Revision-Date: 2024-04-13 16:48+0000\n"
 "Last-Translator: Dr_Perry_Coke <dr.perrycoke@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/klipperscreen/"
 "klipperscreen/ru/>\n"
@@ -70,9 +70,6 @@ msgstr "Вы уверены, что хотите исключить объект
 
 msgid "Are you sure you want to run Emergency Stop?"
 msgstr "Вы уверены, что хотите запустить аварийную остановку?"
-
-msgid "Are you sure you want to stop the calibration?"
-msgstr "Вы уверены, что хотите остановить калибровку?"
 
 msgid "Are you sure you wish to cancel this print?"
 msgstr "Вы хотите отменить эту печать?"
@@ -195,6 +192,9 @@ msgstr "Остудить"
 msgid "Couldn't add network"
 msgstr ""
 
+msgid "Current"
+msgstr ""
+
 msgid "Current percentage and graph line"
 msgstr ""
 
@@ -203,6 +203,9 @@ msgstr "DPMS не загрузилась и была отключена"
 
 msgid "Date"
 msgstr "Дата"
+
+msgid "Delete"
+msgstr "Удалить"
 
 msgid "Delete Directory?"
 msgstr "Удалить каталог?"
@@ -224,9 +227,6 @@ msgstr "Расстояние (mm)"
 
 #, python-format
 msgid "Do you want to forget or disconnect %s?"
-msgstr ""
-
-msgid "Do you want to let KlipperScreen try to solve the issue?"
 msgstr ""
 
 #, python-format
@@ -265,6 +265,9 @@ msgstr ""
 
 msgid "Estimated Time Method"
 msgstr "Расчётное время"
+
+msgid "Example"
+msgstr ""
 
 msgid "Exclude Object"
 msgstr "Исключить Объект"
@@ -407,9 +410,6 @@ msgstr "Запустить калибровку ПИД-регулятора дл
 msgid "Input Shaper"
 msgstr "Входной шейпер"
 
-msgid "Insufficient priviledges detected"
-msgstr ""
-
 msgid "Insufficient privileges"
 msgstr ""
 
@@ -440,6 +440,9 @@ msgstr "В зависимости от мощности нагревателя �
 msgid "It's possible that the configuration is not correct"
 msgstr "Возможно, конфигурация неверна"
 
+msgid "Job Status"
+msgstr ""
+
 msgid "Klipper Restart"
 msgstr "Klipper Рестарт"
 
@@ -468,6 +471,9 @@ msgstr "Язык"
 
 msgid "Large"
 msgstr "Большой"
+
+msgid "Last Duration"
+msgstr ""
 
 msgid "Last Used"
 msgstr "Последнее использование"
@@ -544,9 +550,6 @@ msgstr ""
 msgid "Menu"
 msgstr "Меню"
 
-msgid "Mesh calibrate"
-msgstr "Калибровка сетки"
-
 msgid "Minimum Cruise Ratio"
 msgstr "Минимальная круизная скорость"
 
@@ -592,6 +595,9 @@ msgstr "Новый"
 msgid "No elegible macros:"
 msgstr "Нет понятных макросов:"
 
+msgid "No info available"
+msgstr ""
+
 msgid "No mesh has been loaded"
 msgstr "Ни одна сетка не была загружена"
 
@@ -612,6 +618,9 @@ msgstr "Журнал уведомлений пуст"
 
 msgid "Notifications"
 msgstr "Уведомления"
+
+msgid "Nozzle diameter"
+msgstr ""
 
 msgid "Only for the move panel"
 msgstr ""
@@ -659,11 +668,14 @@ msgstr "Питание"
 msgid "Power On Printer"
 msgstr "Включить принтер"
 
+msgid "Pressure Advance"
+msgstr "Повышение давления"
+
 msgid "Pressure Advance:"
 msgstr "Повышение давления:"
 
-msgid "Pressure Advance"
-msgstr "Повышение давления"
+msgid "Pressure advance"
+msgstr ""
 
 msgid "Print"
 msgstr "Печать"
@@ -813,6 +825,9 @@ msgstr "Слайсер:"
 msgid "Small"
 msgstr "Маленький"
 
+msgid "Smooth time"
+msgstr ""
+
 msgid "Speed (mm/s)"
 msgstr "Скорость (мм/с)"
 
@@ -905,15 +920,15 @@ msgstr "Обновить"
 msgid "Updating"
 msgstr "Обновление"
 
-msgid "Uploaded"
-msgstr "Загружено"
-
 msgid "Useful for un-responsive touchscreens"
 msgstr "Пригодится для невосприимчивых сенсорных экранов"
 
 msgid "WebRTC is not supported by the backend trying Stream"
 msgstr ""
 "Отсутствует поддержка WebRTC у бэкенда, который пытается передать поток"
+
+msgid "Working"
+msgstr ""
 
 msgid "XY Move Speed (mm/s)"
 msgstr "Скорость перемещения по осям XY (мм/с)"
@@ -948,6 +963,9 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
+msgid "g"
+msgstr ""
+
 msgid "hour"
 msgid_plural "hours"
 msgstr[0] "час"
@@ -978,11 +996,20 @@ msgstr "мм/с²"
 msgid "mm³/s"
 msgstr "мм³/с"
 
+msgid "s"
+msgstr ""
+
 msgid "second"
 msgid_plural "seconds"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
+
+#~ msgid "Mesh calibrate"
+#~ msgstr "Калибровка сетки"
+
+#~ msgid "Uploaded"
+#~ msgstr "Загружено"
 
 #~ msgid "Ended official support in June 2023"
 #~ msgstr "Официальная поддержка прекращена в июне 2023 г"
@@ -1095,9 +1122,6 @@ msgstr[2] ""
 #~ msgid "Retry #%s"
 #~ msgstr "Повторная попытка #%s"
 
-#~ msgid "Delete"
-#~ msgstr "Удалить"
-
 #~ msgid "Off"
 #~ msgstr "Выкл."
 
@@ -1134,9 +1158,6 @@ msgstr[2] ""
 
 #~ msgid "IPv6"
 #~ msgstr "IPv6"
-
-#~ msgid "Duration Only"
-#~ msgstr "Продолжительность печати"
 
 #~ msgid "Klipper Version"
 #~ msgstr "Версия Klipper"
