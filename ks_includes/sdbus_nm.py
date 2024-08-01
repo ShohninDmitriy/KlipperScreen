@@ -4,6 +4,7 @@
 import subprocess
 import logging
 
+import sdbus
 from sdbus_block.networkmanager import (
     NetworkManager,
     NetworkDeviceGeneric,
@@ -17,7 +18,6 @@ from sdbus_block.networkmanager import (
     enums,
     exceptions,
 )
-from sdbus import sd_bus_open_system, set_default_bus
 from gi.repository import GLib
 from uuid import uuid4
 
@@ -91,10 +91,10 @@ class SdbusNm:
 
     def __init__(self, popup_callback):
         self.ensure_nm_running()
-        self.system_bus = sd_bus_open_system()  # We need system bus
+        self.system_bus = sdbus.sd_bus_open_system()  # We need system bus
         if self.system_bus is None:
             return None
-        set_default_bus(self.system_bus)
+        sdbus.set_default_bus(self.system_bus)
         self.nm = NetworkManager()
         self.wlan_device = (
             self.get_wireless_interfaces()[0]
@@ -162,9 +162,6 @@ class SdbusNm:
 
     def is_known(self, ssid):
         return any(net["SSID"] == ssid for net in self.get_known_networks())
-
-    def is_open(self, ssid):
-        return self.get_security_type(ssid) == "Open"
 
     def get_ip_address(self):
         active_connection_path = self.nm.primary_connection
@@ -240,17 +237,17 @@ class SdbusNm:
             "802-11-wireless": {
                 "mode": ("s", "infrastructure"),
                 "ssid": ("ay", ssid.encode("utf-8")),
+                "security": ("s", "802-11-wireless-security"),
             },
             "ipv4": {"method": ("s", "auto")},
             "ipv6": {"method": ("s", "auto")},
         }
 
-        if security_type != "Open":
-            properties["802-11-wireless"]["security"] = (
-                "s",
-                "802-11-wireless-security",
-            )
-        if "WPA-PSK" in security_type:
+        if security_type == "Open":
+            properties["802-11-wireless-security"] = {
+                "key-mgmt": ("s", "none"),
+            }
+        elif "WPA-PSK" in security_type:
             properties["802-11-wireless-security"] = {
                 "key-mgmt": ("s", "wpa-psk"),
                 "psk": ("s", psk),
@@ -268,7 +265,6 @@ class SdbusNm:
         elif "OWE" in security_type:
             properties["802-11-wireless-security"] = {
                 "key-mgmt": ("s", "owe"),
-                "psk": ("s", psk),
             }
         elif "802.1x" in security_type:
             properties["802-11-wireless-security"] = {
