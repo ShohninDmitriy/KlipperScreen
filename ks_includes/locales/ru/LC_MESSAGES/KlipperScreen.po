@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: KlipperScreen\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-10-09 18:08-0300\n"
-"PO-Revision-Date: 2024-07-05 19:09+0000\n"
-"Last-Translator: Артем <gaz70rus@gmail.com>\n"
+"PO-Revision-Date: 2024-11-13 17:00+0000\n"
+"Last-Translator: Владимир Чернояров <s3mpau@gmail.com>\n"
 "Language-Team: Russian <https://hosted.weblate.org/projects/klipperscreen/"
 "klipperscreen/ru/>\n"
 "Language: ru\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Weblate 5.7-dev\n"
+"X-Generator: Weblate 5.9-dev\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
 #, python-format
@@ -25,7 +25,7 @@ msgid "%s will be updated to version"
 msgstr "%s будет обновлен до версии"
 
 msgid "(default)"
-msgstr "(стандартный)"
+msgstr "(по умолчанию)"
 
 msgid "24 Hour Time"
 msgstr "24-x часовой формат"
@@ -43,7 +43,7 @@ msgid "Acceleration:"
 msgstr "Ускорение:"
 
 msgid "Accept"
-msgstr "Применить"
+msgstr "Подтвердить"
 
 msgid "Add profile"
 msgstr "Добавить профиль"
@@ -144,9 +144,8 @@ msgstr "Не удается подключиться к Moonraker"
 msgid "Changes how the interface looks"
 msgstr "Изменение внешнего вида интерфейса"
 
-#, fuzzy
 msgid "Changes how the time remaining is calculated"
-msgstr "Редактировать расчет оставшегося времени"
+msgstr "Изменить расчет оставшегося времени"
 
 msgid "Channel"
 msgstr "Канал"
@@ -164,7 +163,7 @@ msgid "Close"
 msgstr "Закрыть"
 
 msgid "Close messages after a timeout"
-msgstr "Закрывать сообщения по истечении таймаута""
+msgstr "Закрыть сообщения по истечении времени"
 
 msgid "Complete"
 msgstr "Готово"
@@ -243,7 +242,7 @@ msgid "Emergency Stop"
 msgstr "Аварийная остановка"
 
 msgid "Enable screen power management"
-msgstr "Включить управление питанием экрана"
+msgstr "Включить управление питанием дисплея"
 
 msgid "Error"
 msgstr "Ошибка"
@@ -256,13 +255,13 @@ msgid "Error getting active spool"
 msgstr "Ошибка при получении активной катушки"
 
 msgid "Error setting active spool"
-msgstr "Ошибка настройки активной катушки"
+msgstr "Ошибка при установке активной катушки"
 
 msgid "Error trying to fetch spools"
 msgstr "Ошибка про получении списка катушек"
 
 msgid "Error: Couldn't get a position to probe"
-msgstr "Ошибка: Не удалось получить позицию для зондирования"
+msgstr "Ошибка: Невозможно получить позицию зонда"
 
 msgid "Estimated Time"
 msgstr "Расчетное время"
@@ -352,7 +351,7 @@ msgid "Font Size"
 msgstr "Размер шрифта"
 
 msgid "For mouse control or to verify touchscreen accuracy"
-msgstr ""
+msgstr "Для управления мышью или проверки точности сенсорного экрана"
 
 msgid "Forget"
 msgstr "Забыть"
@@ -415,10 +414,10 @@ msgid "Initiate a PID calibration for:"
 msgstr "Запустить калибровку ПИД-регулятора для:"
 
 msgid "Input Shaper"
-msgstr ""
+msgstr "Входной шейпер"
 
 msgid "Insufficient privileges"
-msgstr "Недостаточные привилегии"
+msgstr "Недостаточно прав"
 
 msgid "Interface"
 msgstr "Интерфейс"
@@ -429,10 +428,8 @@ msgstr "Неверный"
 msgid "Invalid password"
 msgstr "Неверный пароль"
 
-#, fuzzy
-#| msgid "Temperature"
 msgid "Invalid temperature"
-msgstr "Tемпература"
+msgstr "Недопустимая температура"
 
 msgid "Inversely affects the icon size"
 msgstr "Обратное влияние на размер иконки"
@@ -450,10 +447,10 @@ msgid "It may take more than 5 minutes depending on the heater power."
 msgstr "В зависимости от мощности нагревателя это может занять более 5 минут."
 
 msgid "It's possible that the configuration is not correct"
-msgstr "Возможно, конфигурация неверна"
+msgstr "Возможно текущая конфигурация некорректна"
 
 msgid "Job Status"
-msgstr "Статус работы"
+msgstr "Статус печати"
 
 msgid "Klipper Restart"
 msgstr "Klipper Рестарт"
@@ -485,7 +482,7 @@ msgid "Large"
 msgstr "Большой"
 
 msgid "Last Duration"
-msgstr "Последняя продолжительность"
+msgstr "Продолжительность"
 
 msgid "Last Used"
 msgstr "Последнее использование"
@@ -512,7 +509,7 @@ msgid "Loading..."
 msgstr "Загрузка..."
 
 msgid "Lost Connection to Moonraker"
-msgstr "Утраченная связь с Moonraker"
+msgstr "Потеряно соединение с Moonraker"
 
 msgid "Lower Nozzle"
 msgstr "Поднять стол"
@@ -539,7 +536,7 @@ msgid "Max Velocity"
 msgstr "Максимальная скорость"
 
 msgid "Max:"
-msgstr ""
+msgstr "Максимум:"
 
 msgid "Maximum"
 msgstr "Максимум"
@@ -563,7 +560,7 @@ msgid "Menu"
 msgstr "Меню"
 
 msgid "Minimum Cruise Ratio"
-msgstr "Минимальная круизная скорость"
+msgstr "Минимальный коэффициент крейсерской скорости"
 
 msgid "Minimum:"
 msgstr "Минимум:"
@@ -608,13 +605,13 @@ msgid "No elegible macros:"
 msgstr "Нет понятных макросов:"
 
 msgid "No info available"
-msgstr "Информация недоступна"
+msgstr "Нет доступной информации"
 
 msgid "No mesh has been loaded"
 msgstr "Сетка стола не загружена"
 
 msgid "No wireless interface has been found"
-msgstr "Сетевые интерфейсы не обнаружены"
+msgstr "Не обнаружен беспроводной интерфейс"
 
 msgid "Not all screens support this"
 msgstr "Не все экраны поддерживают это"
@@ -635,7 +632,7 @@ msgid "Nozzle diameter"
 msgstr "Диаметр сопла"
 
 msgid "Only for the move panel"
-msgstr "Только для панели перемещения"
+msgstr "Только для перемещения панели"
 
 #, python-format
 msgid "Outdated by %d"
@@ -683,13 +680,13 @@ msgid "Power On Printer"
 msgstr "Включить принтер"
 
 msgid "Pressure Advance"
-msgstr ""
+msgstr "Опережение давления"
 
 msgid "Pressure Advance:"
-msgstr ""
+msgstr "Опережение давления:"
 
 msgid "Pressure advance"
-msgstr ""
+msgstr "Опережения давления"
 
 msgid "Print"
 msgstr "Печать"
@@ -770,7 +767,7 @@ msgid "Retrying"
 msgstr "Повторная попытка"
 
 msgid "Rotation invalid"
-msgstr "Недопустимое вращение"
+msgstr "Вращение невозможно"
 
 msgid "Save"
 msgstr "Сохранить"
@@ -801,7 +798,7 @@ msgid "Screws Adjust"
 msgstr "Настроить винты"
 
 msgid "Screws not used:"
-msgstr "Неиспользуемые винты:"
+msgstr "Регулировочные винты не используются:"
 
 msgid "Send"
 msgstr "Отправить"
@@ -822,7 +819,7 @@ msgid "Show Scrollbars Buttons"
 msgstr "Показать полосу прокрутки"
 
 msgid "Show cursor"
-msgstr ""
+msgstr "Показать курсор"
 
 msgid "Show only devices that are able to be set"
 msgstr "Показать только те устройства, которые можно установить"
@@ -874,7 +871,7 @@ msgstr "Запуск обновления для"
 
 msgid "Swaps buttons if they are on top of each other, affects other panels"
 msgstr ""
-"Меняет местами кнопки, если они находятся друг над другом, влияет на другие "
+"Меняет местами кнопки, если они находятся друг над другом. Влияет на другие "
 "панели"
 
 msgid "System"
@@ -896,22 +893,22 @@ msgid "Temperature"
 msgstr "Tемпература"
 
 msgid "Temperature too low to extrude"
-msgstr ""
+msgstr "Слишком низкая температура для выдавливания"
 
 msgid "The system doesn't meet the minimum requirement"
 msgstr "Система не соответствует минимальным требованиям"
 
 msgid "This panel supports up-to 9 screws in a 3x3 Grid"
-msgstr "Эта панель поддерживает до 9 винтов в сетке 3х3"
+msgstr "Эта панель поддерживает до 9 винтов в сетке 3x3."
 
 msgid "This will affect screw positions and mesh graph"
 msgstr "Это повлияет на положение винтов и график сетки"
 
 msgid "Timeout for screen black-out or power-off"
-msgstr "Тайм-аут для затемнения экрана или отключения питания"
+msgstr "Время отключения экрана"
 
 msgid "Timeout for screen black-out or power-off during printing"
-msgstr "Тайм-аут для отключения экрана или питания во время печати"
+msgstr "Время отключения экрана во время печати"
 
 msgid "Total:"
 msgstr "Итого:"
@@ -920,7 +917,7 @@ msgid "Unknown Heater"
 msgstr "Неизвестный нагреватель"
 
 msgid "Unknown security type"
-msgstr "Неизвестный тип защиты"
+msgstr "Неизвестный тип шифрования"
 
 msgid "Unload"
 msgstr "Выгрузить"
@@ -941,17 +938,17 @@ msgid "Updating"
 msgstr "Обновление"
 
 msgid "Useful for un-responsive touchscreens"
-msgstr "Пригодится для невосприимчивых сенсорных экранов"
+msgstr "Полезно для неотзывчивых сенсорных экранов"
 
 msgid "User"
-msgstr ""
+msgstr "Пользователь"
 
 msgid "WebRTC is not supported by the backend trying Stream"
 msgstr ""
 "Отсутствует поддержка WebRTC у бэкенда, который пытается передать поток"
 
 msgid "Working"
-msgstr "Работающий"
+msgstr "Печатает"
 
 msgid "XY Move Speed (mm/s)"
 msgstr "Скорость перемещения по осям XY (мм/с)"
@@ -982,9 +979,9 @@ msgstr[2] "изменений"
 
 msgid "day"
 msgid_plural "days"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "день"
+msgstr[1] "дней"
+msgstr[2] "дней"
 
 msgid "g"
 msgstr ""
@@ -1024,9 +1021,9 @@ msgstr "с"
 
 msgid "second"
 msgid_plural "seconds"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "секунда"
+msgstr[1] "секунды"
+msgstr[2] "секунд"
 
 #~ msgid "Hide temp."
 #~ msgstr "Скрыть температуру."
