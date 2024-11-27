@@ -1,4 +1,5 @@
 import logging
+
 import gi
 
 gi.require_version("Gtk", "3.0")
@@ -260,6 +261,7 @@ class Printer:
                 "homed_axes": self.get_stat("toolhead", "homed_axes"),
                 "quad_gantry_level": self.get_stat("quad_gantry_level"),
                 "z_tilt": self.get_stat("z_tilt"),
+                "available_commands": self.available_commands,
             }
         }
 
