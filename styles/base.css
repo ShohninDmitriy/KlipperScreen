@@ -71,6 +71,7 @@ button {
     border-radius: 0;
     border: 0;
     -gtk-icon-shadow: none;
+    transition: padding 0s;
 }
 
 .active image,
@@ -158,7 +159,7 @@ combobox arrow:disabled {
 }
 
 cellview {
-    padding: 0.5em 0.25em 0.5em 0;
+    padding: 0.2em 0.25em 0.2em 0.1em;
     font-size: 0.91em;
 }
 
@@ -288,6 +289,10 @@ trough {
 
 .title_bar {
     min-height: 2em;
+}
+
+.spoolman_low {
+    color: @warning;
 }
 
 .content {
