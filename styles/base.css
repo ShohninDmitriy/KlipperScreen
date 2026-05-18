@@ -33,7 +33,7 @@ window {
 }
 
 treeview.view{
-    padding-right: 0.25em;
+    padding: 1em .25em;
 }
 
 junction {
@@ -670,4 +670,12 @@ flowbox button {
 
 keyboard_box {
     padding: 0 20em;
+}
+
+.spool_title {
+    padding: .5em;
+}
+
+.spool_icon {
+    padding-right: .5em;
 }

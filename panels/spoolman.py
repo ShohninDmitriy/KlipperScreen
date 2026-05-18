@@ -5,12 +5,12 @@ import pathlib
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GdkPixbuf, GObject, Pango, Gdk
-from ks_includes.widgets.combo import ComboBoxPlus
-from ks_includes.screen_panel import ScreenPanel
-from ks_includes.KlippyRest import KlippyRest
-from ks_includes.spoolman_api import SpoolmanAPI
 from datetime import datetime
+
+from gi.repository import Gdk, GdkPixbuf, GObject, Gtk, Pango
+
+from ks_includes.screen_panel import ScreenPanel
+from ks_includes.widgets.combo import ComboBoxPlus
 
 try:
     from zoneinfo import ZoneInfo
@@ -19,20 +19,16 @@ except ImportError:
 
 
 def format_date(date):
-    if date.endswith('Z'):
-        date = f'{date[:-1]}+00:00'
+    if date.endswith("Z"):
+        date = f"{date[:-1]}+00:00"
 
-    formats = [
-        '%Y-%m-%dT%H:%M:%S.%f%z',
-        '%Y-%m-%dT%H:%M:%S%z',
-        '%Y-%m-%dT%H:%M:%S'
-    ]
+    formats = ["%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S"]
     for fmt in formats:
         try:
             parsed_date = datetime.strptime(date, fmt)
             # If there's no timezone info, assume UTC
             if parsed_date.tzinfo is None:
-                parsed_date = parsed_date.replace(tzinfo=ZoneInfo('UTC'))
+                parsed_date = parsed_date.replace(tzinfo=ZoneInfo("UTC"))
             return parsed_date
         except ValueError:
             continue
@@ -106,10 +102,15 @@ class SpoolmanSpool(GObject.GObject):
 
     @property
     def name(self):
-        result = self.filament.name
-        if self.filament.vendor:
-            result = " ".join([self.filament.vendor.name, "-", result])
-        return result
+        parts = []
+        vendor_name = getattr(self.filament.vendor, "name", None) if self.filament.vendor else None
+        if vendor_name:
+            parts.append(vendor_name)
+        if getattr(self.filament, "name", None):
+            parts.append(self.filament.name)
+        if getattr(self.filament, "material", None):
+            parts.append(self.filament.material)
+        return " - ".join(parts) if parts else self.filament.name
 
     @property
     def icon(self):
@@ -124,9 +125,9 @@ class SpoolmanSpool(GObject.GObject):
                 SpoolmanSpool._spool_icon = pathlib.Path(_spool_icon_path).read_text()
 
             loader = GdkPixbuf.PixbufLoader()
-            color = self.filament.color_hex if hasattr(self.filament, 'color_hex') else '000000'
+            color = self.filament.color_hex if hasattr(self.filament, "color_hex") else "000000"
             loader.write(
-                SpoolmanSpool._spool_icon.replace('var(--filament-color)', f'#{color}').encode()
+                SpoolmanSpool._spool_icon.replace("var(--filament-color)", f"#{color}").encode()
             )
             loader.close()
             self._icon = loader.get_pixbuf()
@@ -146,8 +147,12 @@ class Panel(ScreenPanel):
     def spool_compare_date(model, row1, row2, user_data):
         spool1 = model.get_value(row1, 0)
         spool2 = model.get_value(row2, 0)
-        return 1 if (spool1.last_used or datetime.min).replace(tzinfo=None) > \
-                    (spool2.last_used or datetime.min).replace(tzinfo=None) else -1
+        return (
+            1
+            if (spool1.last_used or datetime.min).replace(tzinfo=None)
+            > (spool2.last_used or datetime.min).replace(tzinfo=None)
+            else -1
+        )
 
     def _on_material_filter_clear(self, sender, combobox):
         self._filters["material"] = None
@@ -166,9 +171,9 @@ class Panel(ScreenPanel):
         title = title or "Spoolman"
         super().__init__(screen, title)
         if self._config.get_main_config().getboolean("24htime", True):
-            self.timeFormat = '%Y-%m-%d %H:%M'
+            self.timeFormat = "%Y-%m-%d %H:%M"
         else:
-            self.timeFormat = '%Y-%m-%d %I:%M %p'
+            self.timeFormat = "%Y-%m-%d %I:%M %p"
 
         SpoolmanSpool.theme_path = screen.theme
         GObject.type_register(SpoolmanSpool)
@@ -185,31 +190,40 @@ class Panel(ScreenPanel):
 
         self.scroll = self._gtk.ScrolledWindow()
 
-        clear_active_spool = self._gtk.Button("cancel", _("Clear"), "color2", self.bts, Gtk.PositionType.LEFT, 1)
+        clear_active_spool = self._gtk.Button(
+            "cancel", _("Clear"), "color2", self.bts, Gtk.PositionType.LEFT, 1
+        )
         clear_active_spool.get_style_context().add_class("buttons_slim")
-        clear_active_spool.connect('clicked', self.clear_active_spool)
+        clear_active_spool.connect("clicked", self.clear_active_spool)
 
-        refresh = self._gtk.Button("refresh", style="color1", scale=.66)
+        refresh = self._gtk.Button("refresh", style="color1", scale=0.66)
         refresh.get_style_context().add_class("buttons_slim")
-        refresh.connect('clicked', self.refresh)
+        refresh.connect("clicked", self.refresh)
 
         sort_btn_id = self._gtk.Button(None, _("ID"), "color4", self.bts, Gtk.PositionType.RIGHT, 1)
         sort_btn_id.connect("clicked", self.change_sort, "id")
         sort_btn_id.get_style_context().add_class("buttons_slim")
 
-        sort_btn_used = self._gtk.Button(None, _("Last Used"), "color3", self.bts, Gtk.PositionType.RIGHT, 1)
+        sort_btn_used = self._gtk.Button(
+            None, _("Used"), "color3", self.bts, Gtk.PositionType.RIGHT, 1
+        )
         sort_btn_used.connect("clicked", self.change_sort, "last_used")
         sort_btn_used.get_style_context().add_class("buttons_slim")
 
         switch = Gtk.Switch(hexpand=False, vexpand=False)
-        switch.set_active(self._config.get_config().getboolean("spoolman", "hide_archived", fallback=True))
-        switch.connect("notify::active", self.switch_config_option, "spoolman", "hide_archived", self.load_spools)
-
-        name = Gtk.Label(halign=Gtk.Align.START, valign=Gtk.Align.CENTER, wrap=True, wrap_mode=Pango.WrapMode.WORD_CHAR)
-        name.set_markup(_("Archived"))
+        switch.set_active(
+            self._config.get_config().getboolean("spoolman", "hide_archived", fallback=True)
+        )
+        switch.connect(
+            "notify::active",
+            self.switch_config_option,
+            "spoolman",
+            "hide_archived",
+            self.load_spools,
+        )
 
         archived = Gtk.Box(valign=Gtk.Align.CENTER)
-        archived.add(name)
+        archived.add(self._gtk.Image("archived", self._gtk.img_scale * self.bts * 2))
         archived.add(switch)
 
         sbox = Gtk.Box(hexpand=True, vexpand=False)
@@ -234,9 +248,11 @@ class Panel(ScreenPanel):
         _material_filter.pack_start(cellrenderertext, True)
         _material_filter.add_attribute(cellrenderertext, "text", 1)
 
-        _material_reset_filter = self._gtk.Button("cancel", _("Clear"), "color2", self.bts, Gtk.PositionType.LEFT, 1)
+        _material_reset_filter = self._gtk.Button(
+            "cancel", _("Clear"), "color2", self.bts, Gtk.PositionType.LEFT, 1
+        )
         _material_reset_filter.get_style_context().add_class("buttons_slim")
-        _material_reset_filter.connect('clicked', self._on_material_filter_clear, _material_filter)
+        _material_reset_filter.connect("clicked", self._on_material_filter_clear, _material_filter)
 
         hbox.pack_start(label, False, True, 0)
         hbox.pack_start(_material_filter, True, True, 0)
@@ -252,68 +268,108 @@ class Panel(ScreenPanel):
         self.load_spools()
         self._treeview = Gtk.TreeView(model=sortable, headers_visible=False, show_expanders=False)
 
-        text_renderer = Gtk.CellRendererText(wrap_width=self._gtk.content_width / 4)
+        text_renderer = Gtk.CellRendererText()
+        # Using wrapping causes unwanted vertical space, and it adds more each times it wraps
+        text_renderer.set_property("ellipsize", Pango.EllipsizeMode.END)
         pixbuf_renderer = Gtk.CellRendererPixbuf(xpad=5, ypad=5)
         checkbox_renderer = Gtk.CellRendererToggle()
         column_id = Gtk.TreeViewColumn(cell_renderer=text_renderer)
         column_id.set_cell_data_func(
             text_renderer,
-            lambda column, cell, model, it, data:
-            self._set_cell_background(cell, model.get_value(it, 0)) and
-            cell.set_property('text', f'{model.get_value(it, 0).id}')
+            lambda column, cell, model, it, data: (
+                self._set_cell_background(cell, model.get_value(it, 0))
+                and cell.set_property("text", f"{model.get_value(it, 0).id}")
+            ),
         )
         column_id.set_sort_column_id(0)
 
         column_icon = Gtk.TreeViewColumn(cell_renderer=pixbuf_renderer)
         column_icon.set_cell_data_func(
             pixbuf_renderer,
-            lambda column, cell, model, it, data:
-            self._set_cell_background(cell, model.get_value(it, 0)) and
-            cell.set_property('pixbuf', model.get_value(it, 0).icon)
+            lambda column, cell, model, it, data: (
+                self._set_cell_background(cell, model.get_value(it, 0))
+                and cell.set_property("pixbuf", model.get_value(it, 0).icon)
+            ),
         )
 
         column_spool = Gtk.TreeViewColumn(cell_renderer=text_renderer)
         column_spool.set_expand(True)
         column_spool.set_cell_data_func(
             text_renderer,
-            lambda column, cell, model, it, data:
-            self._set_cell_background(cell, model.get_value(it, 0)) and
-            cell.set_property('markup', self._get_filament_formated(model.get_value(it, 0)))
+            lambda column, cell, model, it, data: (
+                self._set_cell_background(cell, model.get_value(it, 0))
+                and cell.set_property("markup", self._get_filament_formated(model.get_value(it, 0)))
+            ),
         )
 
         column_last_used = Gtk.TreeViewColumn(cell_renderer=text_renderer)
         column_last_used.set_visible(False)
         column_last_used.set_sort_column_id(1)
 
-        column_material = Gtk.TreeViewColumn(cell_renderer=text_renderer)
-        column_material.set_cell_data_func(
-            text_renderer,
-            lambda column, cell, model, it, data:
-            self._set_cell_background(cell, model.get_value(it, 0)) and
-            cell.set_property('text', model.get_value(it, 0).filament.material)
+        edit_renderer = Gtk.CellRendererPixbuf(xpad=8, ypad=8)
+        self._column_edit = Gtk.TreeViewColumn(cell_renderer=edit_renderer)
+        self._column_edit.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
+        edit_icon_size = self._gtk.img_scale * self.bts * 2
+        self._column_edit.set_fixed_width(
+            max(edit_icon_size + 20, round(self._gtk.font_size * 6.5))
+        )
+        edit_icon = self._gtk.PixbufFromIcon("edit", edit_icon_size, edit_icon_size)
+        self._column_edit.set_cell_data_func(
+            edit_renderer,
+            lambda column, cell, model, it, data: (
+                self._set_cell_background(cell, model.get_value(it, 0))
+                and cell.set_property("pixbuf", edit_icon)
+            ),
         )
 
         checkbox_renderer.connect("toggled", self._set_active_spool)
         column_toggle_active_spool = Gtk.TreeViewColumn(cell_renderer=checkbox_renderer)
         column_toggle_active_spool.set_cell_data_func(
             checkbox_renderer,
-            lambda column, cell, model, it, data:
-            self._set_cell_background(cell, model.get_value(it, 0)) and
-            cell.set_property('active', model.get_value(it, 0).id == self._printer.active_spool_id)
+            lambda column, cell, model, it, data: (
+                self._set_cell_background(cell, model.get_value(it, 0))
+                and cell.set_property(
+                    "active", model.get_value(it, 0).id == self._printer.active_spool_id
+                )
+            ),
         )
 
         self._treeview.append_column(column_id)
         self._treeview.append_column(column_icon)
         self._treeview.append_column(column_spool)
         self._treeview.append_column(column_last_used)
-        self._treeview.append_column(column_material)
+        self._treeview.append_column(self._column_edit)
         self._treeview.append_column(column_toggle_active_spool)
+        self._treeview.connect("button-press-event", self._open_spool_detail)
 
         self.current_sort_widget = sort_btn_id
         sort_btn_used.clicked()
 
         self.scroll.add(self._treeview)
         self.content.add(self.main)
+
+    def _open_spool_detail(self, treeview, event):
+        if event.button != 1:
+            return False
+        path_info = treeview.get_path_at_pos(event.x, event.y)
+        if not path_info:
+            return False
+
+        path, column, _, _ = path_info
+        if column is not self._column_edit:
+            return False
+
+        model = treeview.get_model()
+        it = model.get_iter(path)
+        if it is None:
+            return False
+        spool = model.get_value(it, 0)
+        if spool is None:
+            logging.error(f"Spool object is None at path {path}")
+            return False
+        logging.info(f"Opening spool editor for ID: {spool.id}")
+        self._screen.show_panel("spool_editor", extra=spool)
+        return True
 
     def _filter_spools(self, model, i, data):
         spool: SpoolmanSpool = model[i][0]
@@ -324,23 +380,26 @@ class Panel(ScreenPanel):
 
     def _set_cell_background(self, cell, spool: SpoolmanSpool):
         cell.set_property(
-            'cell-background-rgba', Gdk.RGBA(1, 1, 1, .1) if spool.id == self._printer.active_spool_id else None
+            "cell-background-rgba",
+            Gdk.RGBA(1, 1, 1, 0.1) if spool.id == self._printer.active_spool_id else None,
         )
         return True
 
     def _get_filament_formated(self, spool: SpoolmanSpool):
         if spool.id == self._printer.active_spool_id:
-            result = f'<big><b>{spool.name}</b></big>\n'
+            result = f"<big><b>{spool.name}</b></big>\n"
         else:
-            result = f'<big>{spool.name}</big>\n'
+            result = f"<big>{spool.name}</big>\n"
         if hasattr(spool, "comment"):
-            result += f'{_("Comment")}:<b> {spool.comment}</b>\n'
+            result += f"{_('Comment')}:<b> {spool.comment}</b>\n"
         if spool.last_used:
-            result += f'{_("Last used")}:<b> {spool.last_used.astimezone():{self.timeFormat}}</b>\n'
+            result += f"{_('Used')}:<b> {spool.last_used.astimezone():{self.timeFormat}}</b>\n"
         if hasattr(spool, "remaining_weight"):
-            result += f'{_("Remaining weight")}: <b>{round(spool.remaining_weight, 2)} g</b>\n'
+            result += f"{_('Remaining weight')}: <b>{round(spool.remaining_weight, 2)} g</b>\n"
         if hasattr(spool, "remaining_length"):
-            result += f'{_("Remaining length")}: <b>{round(spool.remaining_length / 1000, 2)} m</b>\n'
+            result += (
+                f"{_('Remaining length')}: <b>{round(spool.remaining_length / 1000, 2)} m</b>\n"
+            )
 
         return result.strip()
 
@@ -383,7 +442,7 @@ class Panel(ScreenPanel):
             return
         model = self._treeview.get_model()
         new_id = self._printer.active_spool_id
-        old_id = getattr(self, '_prev_active_id', None)
+        old_id = getattr(self, "_prev_active_id", None)
         if new_id == old_id:
             return
         found_count = 0
@@ -404,7 +463,9 @@ class Panel(ScreenPanel):
         self.get_active_spool()
 
     def load_spools(self, *args):
-        hide_archived = self._config.get_config().getboolean("spoolman", "hide_archived", fallback=True)
+        hide_archived = self._config.get_config().getboolean(
+            "spoolman", "hide_archived", fallback=True
+        )
         self._model.clear()
         self._materials.clear()
         spools = self._screen.spoolman_api.load_all_spools(allow_archived=not hide_archived)
@@ -416,8 +477,8 @@ class Panel(ScreenPanel):
         for spool in spools:
             spoolObject = SpoolmanSpool(**spool)
             self._model.append(None, [spoolObject])
-            if not hasattr(spoolObject.filament, 'material'):
-                spoolObject.filament.material = ''
+            if not hasattr(spoolObject.filament, "material"):
+                spoolObject.filament.material = ""
             elif spoolObject.filament.material not in materials:
                 materials.append(spoolObject.filament.material)
 
