@@ -117,9 +117,6 @@ class Printer:
             self.store_timeout = None
 
     def process_update(self, data):
-        if self.data is None:
-            return
-
         for x in data:
             if x == "configfile":
                 if "config" in data[x]:
@@ -137,13 +134,15 @@ class Printer:
         # webhooks states: startup, ready, shutdown, error
         # print_stats: standby, printing, paused, error, complete
         # idle_timeout: Idle, Printing, Ready
-        if self.data["webhooks"]["state"] == "ready" and (
-            "print_stats" in self.data and "state" in self.data["print_stats"]
-        ):
-            if self.data["print_stats"]["state"] == "paused":
-                return "paused"
-            if self.data["print_stats"]["state"] == "printing":
-                return "printing"
+        if "webhooks" not in self.data:
+            return self.state
+        if self.data["webhooks"].get("state") == "ready":
+            print_stats = self.data.get("print_stats", {})
+            if "state" in print_stats:
+                if print_stats["state"] == "paused":
+                    return "paused"
+                elif print_stats["state"] == "printing":
+                    return "printing"
         return self.data["webhooks"]["state"]
 
     def process_status_update(self):
@@ -179,12 +178,8 @@ class Printer:
         logging.debug(f"Cameras: {self.cameras}")
 
     def get_config_section_list(self, search=""):
-        if self.config is not None:
-            return (
-                [i for i in list(self.config) if i.startswith(search)]
-                if hasattr(self, "config")
-                else []
-            )
+        if getattr(self, "config", None) is not None:
+            return [i for i in self.config if i.startswith(search)]
         return []
 
     def get_config_section(self, section):
@@ -371,7 +366,8 @@ class Printer:
         for section in self.tempstore[device]:
             if results == 0 or results >= len(self.tempstore[device][section]):
                 temp[section] = self.tempstore[device][section]
-            temp[section] = self.tempstore[device][section][-results:]
+            else:
+                temp[section] = self.tempstore[device][section][-results:]
         return temp
 
     def get_tempstore_size(self):
@@ -401,22 +397,20 @@ class Printer:
         for device in existing_devices | new_devices:
             if device in tempstore:
                 for section in tempstore[device]:
-                    if device in self.tempstore and section in self.tempstore[device]:
-                        self.tempstore[device][section] = tempstore[device][section]
-                    else:
-                        self.tempstore[device][section] = tempstore[device][section]
+                    self.tempstore[device][section] = tempstore[device][section]
         for device in self.tempstore:
             for x in self.tempstore[device]:
                 length = len(self.tempstore[device][x])
                 if length < self.tempstore_size:
-                    for _ in range(1, self.tempstore_size - length):
-                        self.tempstore[device][x].insert(0, 0)
+                    self.tempstore[device][x] = [0] * (
+                        self.tempstore_size - length
+                    ) + self.tempstore[device][x]
         logging.info(f"Temp store: {list(self.tempstore)}")
         if not self.store_timeout:
             self.store_timeout = GLib.timeout_add_seconds(1, self._update_temp_store)
 
     def config_section_exists(self, section):
-        return section in self.get_config_section_list()
+        return section in self.config or section + " " in self.config
 
     def _update_temp_store(self):
         if self.tempstore is None:
@@ -435,6 +429,5 @@ class Printer:
         logging.info("Enabling Spoolman")
         self.spoolman = True
 
-    def set_active_spool(self, spool_id=None, spool_data=None):
-        self.active_spool_id = spool_id
+    def set_active_spool(self, spool_data):
         self.active_spool = spool_data

@@ -73,15 +73,8 @@ class BasePanel(ScreenPanel):
             self.control[item].connect("clicked", self._screen.remove_keyboard)
 
         # Action bar
-        self.action_bar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        if self._screen.vertical_mode:
-            self.action_bar.set_hexpand(True)
-            self.action_bar.set_vexpand(False)
-        else:
-            self.action_bar.set_hexpand(False)
-            self.action_bar.set_vexpand(True)
+        self.action_bar = Gtk.Box(spacing=5)
         self.action_bar.get_style_context().add_class("action_bar")
-        self.action_bar.set_size_request(self._gtk.action_bar_width, self._gtk.action_bar_height)
         self.action_bar.add(self.control["back"])
         self.action_bar.add(self.control["home"])
         self.action_bar.add(self.control["printer_select"])
@@ -92,8 +85,8 @@ class BasePanel(ScreenPanel):
 
         # Titlebar
 
-        # This box will be populated by show_heaters
-        self.control["temp_box"] = Gtk.Box(spacing=10)
+        # This box will be populated with titlebar_items
+        self.control["item_box"] = Gtk.Box(spacing=10)
 
         self.titlelbl = Gtk.Label(
             hexpand=True, halign=Gtk.Align.CENTER, ellipsize=Pango.EllipsizeMode.END
@@ -117,13 +110,16 @@ class BasePanel(ScreenPanel):
         self.labels["spoolman_icon"] = Gtk.Image()
         self.labels["spoolman_icon"].set_from_pixbuf(self.get_spoolman_icon_pixbuf())
         self.labels["spoolman_weight"] = Gtk.Label(label="?")
-        self.control["spoolman_box"] = Gtk.Box()
-        self.control["spoolman_box"].pack_start(self.labels["spoolman_icon"], False, False, 7)
-        self.control["spoolman_box"].pack_start(self.labels["spoolman_weight"], False, False, 0)
+        spoolman_box = Gtk.Box()
+        spoolman_box.pack_start(self.labels["spoolman_icon"], False, False, 7)
+        spoolman_box.pack_start(self.labels["spoolman_weight"], False, False, 0)
+        self.control["spoolman_box"] = Gtk.EventBox()
+        self.control["spoolman_box"].add(spoolman_box)
+        self.control["spoolman_box"].connect("button-press-event", self.open_spool_panel)
 
         self.titlebar = Gtk.Box(spacing=5, valign=Gtk.Align.CENTER)
         self.titlebar.get_style_context().add_class("title_bar")
-        self.titlebar.add(self.control["temp_box"])
+        self.titlebar.add(self.control["item_box"])
         self.titlebar.add(self.titlelbl)
         self.titlebar.add(self.control["time_box"])
         self.titlebar.add(self.control["battery_box"])
@@ -131,19 +127,32 @@ class BasePanel(ScreenPanel):
 
         # Main layout
         self.main_grid = Gtk.Grid()
+        self._build_main_grid()
 
+        self.update_time()
+
+    def _reconfigure_main_grid(self):
+        self.main_grid.remove(self.titlebar)
+        self.main_grid.remove(self.content)
+        self.main_grid.remove(self.action_bar)
+        self._build_main_grid()
+
+    def _build_main_grid(self):
+        self.action_bar.set_size_request(self._gtk.action_bar_width, self._gtk.action_bar_height)
         if self._screen.vertical_mode:
             self.main_grid.attach(self.titlebar, 0, 0, 1, 1)
             self.main_grid.attach(self.content, 0, 1, 1, 1)
             self.main_grid.attach(self.action_bar, 0, 2, 1, 1)
             self.action_bar.set_orientation(orientation=Gtk.Orientation.HORIZONTAL)
+            self.action_bar.set_hexpand(True)
+            self.action_bar.set_vexpand(False)
         else:
-            self.main_grid.attach(self.action_bar, 0, 0, 1, 2)
-            self.action_bar.set_orientation(orientation=Gtk.Orientation.VERTICAL)
             self.main_grid.attach(self.titlebar, 1, 0, 1, 1)
             self.main_grid.attach(self.content, 1, 1, 1, 1)
-
-        self.update_time()
+            self.main_grid.attach(self.action_bar, 0, 0, 1, 2)
+            self.action_bar.set_orientation(orientation=Gtk.Orientation.VERTICAL)
+            self.action_bar.set_hexpand(False)
+            self.action_bar.set_vexpand(True)
 
     def load_battery_icons(self):
         img_size = self._gtk.img_scale * self.bts
@@ -215,10 +224,12 @@ class BasePanel(ScreenPanel):
             return color.strip().lstrip("#") or default_color
         return default_color
 
-    def show_heaters(self, show=True):
-        for child in self.control["temp_box"].get_children():
-            self.control["temp_box"].remove(child)
-        if self._printer is None or not show:
+    def show_titlebar_items(self):
+        if self.control["item_box"].get_children():
+            logging.warning("Titlebar items already populated")
+            return
+        if self._printer is None:
+            logging.warning("Cannot load Titlebar items, printer not initialized")
             return
         try:
             devices = self._printer.get_temp_devices()
@@ -232,6 +243,11 @@ class BasePanel(ScreenPanel):
                 if icon is not None:
                     self.labels[f"{device}_box"].pack_start(icon, False, False, 3)
                 self.labels[f"{device}_box"].pack_start(self.labels[device], False, False, 0)
+                self.labels[f"{device}_eventbox"] = Gtk.EventBox()
+                self.labels[f"{device}_eventbox"].add(self.labels[f"{device}_box"])
+                self.labels[f"{device}_eventbox"].connect(
+                    "button-press-event", self.open_temp_panel, device
+                )
 
             # Limit the number of items according to resolution
             nlimit = int(round(log(self._screen.width, 10) * 5 - 10.5))
@@ -239,17 +255,17 @@ class BasePanel(ScreenPanel):
             if len(self._printer.get_tools()) > (nlimit - 1):
                 self.current_extruder = self._printer.get_stat("toolhead", "extruder")
                 if self.current_extruder and f"{self.current_extruder}_box" in self.labels:
-                    self.control["temp_box"].add(self.labels[f"{self.current_extruder}_box"])
+                    self.control["item_box"].add(self.labels[f"{self.current_extruder}_eventbox"])
             else:
                 self.current_extruder = False
             for device in devices:
                 if n >= nlimit:
                     break
                 if device.startswith("extruder") and self.current_extruder is False:
-                    self.control["temp_box"].add(self.labels[f"{device}_box"])
+                    self.control["item_box"].add(self.labels[f"{device}_eventbox"])
                     n += 1
                 elif device.startswith("heater"):
-                    self.control["temp_box"].add(self.labels[f"{device}_box"])
+                    self.control["item_box"].add(self.labels[f"{device}_eventbox"])
                     n += 1
             for item in self.titlebar_items:
                 # Users can fill the bar if they want
@@ -261,26 +277,37 @@ class BasePanel(ScreenPanel):
                     continue
                 for device in devices:
                     name = device.split()[1] if len(device.split()) > 1 else device
-                    if name == item and self.labels[f"{device}_box"].get_parent() is None:
-                        self.control["temp_box"].add(self.labels[f"{device}_box"])
+                    if name == item and self.labels[f"{device}_eventbox"].get_parent() is None:
+                        self.control["item_box"].add(self.labels[f"{device}_eventbox"])
                         n += 1
                         break
             if (
                 n < nlimit
                 and self._printer.spoolman
-                and self.control["spoolman_box"].get_parent() != self.control["temp_box"]
+                and self.control["spoolman_box"].get_parent() != self.control["item_box"]
             ):
                 self.add_spoolman_box()
                 n += 1
 
-            self.control["temp_box"].show_all()
+            self.control["item_box"].show_all()
         except Exception as e:
             logging.debug(f"Couldn't create heaters box: {e}")
 
+    def clear_titlebar_items(self):
+        for child in self.control["item_box"].get_children():
+            self.control["item_box"].remove(child)
+
     def add_spoolman_box(self):
-        self.control["temp_box"].add(self.control["spoolman_box"])
+        self.control["item_box"].add(self.control["spoolman_box"])
         self.set_spoolman_refresh()
-        self.fetch_spoolman()
+
+    def open_spool_panel(self, widget=None, event=None):
+        self._screen.show_panel("spoolman")
+        return True
+
+    def open_temp_panel(self, widget=None, event=None, device=None):
+        self._screen.show_panel("temperature", extra=device)
+        return True
 
     def get_icon(self, device, img_size):
         if device.startswith("extruder"):
@@ -310,9 +337,9 @@ class BasePanel(ScreenPanel):
 
     def set_spoolman_refresh(self):
         if self.spoolman_update is None:
-            self.spoolman_update = GLib.timeout_add_seconds(60, self.fetch_spoolman)
+            self.spoolman_update = GLib.timeout_add_seconds(20, self.fetch_spoolman)
 
-    def add_content(self, panel):
+    def get_printer_state(self):
         printing = self._printer and self._printer.state in {"printing", "paused"}
         connected = self._printer and self._printer.state not in {
             "disconnected",
@@ -320,14 +347,20 @@ class BasePanel(ScreenPanel):
             "shutdown",
             "error",
         }
-        printer_select = "printer_select" not in self._screen._cur_panels
+        printer_select = "printer_select" in self._screen._cur_panels
+        return printing, connected, printer_select
+
+    def update_action_bar(self):
+        printing, connected, printer_select = self.get_printer_state()
         self.control["estop"].set_visible(printing)
         self.control["shutdown"].set_visible(not printing)
-        self.show_shortcut(connected and printer_select)
-        self.show_heaters(connected and printer_select)
+        self.show_shortcut(connected and not printer_select)
         self.show_printer_select(len(self._config.get_printers()) > 1)
         for control in ("back", "home"):
             self.set_control_sensitive(len(self._screen._cur_panels) > 1, control=control)
+
+    def add_content(self, panel):
+        self.update_action_bar()
         self.current_panel = panel
         self.set_title(panel.title)
         self.content.add(panel.content)
@@ -362,14 +395,12 @@ class BasePanel(ScreenPanel):
         if (
             not self._printer
             or "printer_select" in self._screen._cur_panels
-            or self.control["spoolman_box"].get_parent() != self.control["temp_box"]
+            or self.control["spoolman_box"].get_parent() != self.control["item_box"]
         ):
             logging.debug("Stopping Spoolman updates")
             self.spoolman_update = None
             return False
-        logging.debug("Fetching Spoolman")
-        self._screen.update_spool_data()
-        self.update_spoolman_weight_label()
+        self._screen.get_active_spool()
         return True
 
     def back(self, widget=None):
@@ -456,13 +487,15 @@ class BasePanel(ScreenPanel):
             and "extruder" in data["toolhead"]
             and data["toolhead"]["extruder"] != self.current_extruder
         ):
-            self.control["temp_box"].remove(self.labels[f"{self.current_extruder}_box"])
+            self.control["item_box"].remove(self.labels[f"{self.current_extruder}_eventbox"])
             self.current_extruder = data["toolhead"]["extruder"]
-            self.control["temp_box"].pack_start(
-                self.labels[f"{self.current_extruder}_box"], True, True, 3
+            self.control["item_box"].pack_start(
+                self.labels[f"{self.current_extruder}_eventbox"], True, True, 3
             )
-            self.control["temp_box"].reorder_child(self.labels[f"{self.current_extruder}_box"], 0)
-            self.control["temp_box"].show_all()
+            self.control["item_box"].reorder_child(
+                self.labels[f"{self.current_extruder}_eventbox"], 0
+            )
+            self.control["item_box"].show_all()
 
         return False
 
