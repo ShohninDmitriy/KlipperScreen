@@ -115,11 +115,17 @@ class Panel(ScreenPanel):
             distgrid.attach(self.labels[i], j, 0, 1, 1)
 
         for p in ("pos_x", "pos_y", "pos_z"):
-            self.labels[p] = Gtk.Label()
+            self.labels[p] = self._gtk.Button()
+            self.labels[p].set_hexpand(False)
+            self.labels[p].set_vexpand(True)
+            self.labels[p].connect("clicked", self.menu_item_clicked, {"panel": "move_advanced"})
+            self.labels[p].get_style_context().add_class("no-margin")
         self.labels["move_dist"] = Gtk.Label(label=_("Move Distance (mm)"))
 
-        bottomgrid = Gtk.Grid(row_homogeneous=True, column_homogeneous=True)
-        bottomgrid.set_direction(Gtk.TextDirection.LTR)
+        bottomgrid = Gtk.Grid(column_homogeneous=True)
+        bottomgrid.set_row_spacing(0)
+        bottomgrid.get_style_context().add_class("no-margin")
+        bottomgrid.get_style_context().add_class("no-padding")
         bottomgrid.attach(self.labels["pos_x"], 0, 0, 1, 1)
         bottomgrid.attach(self.labels["pos_y"], 1, 0, 1, 1)
         bottomgrid.attach(self.labels["pos_z"], 2, 0, 1, 1)
@@ -228,9 +234,9 @@ class Panel(ScreenPanel):
             homed_axes = self._printer.get_stat("toolhead", "homed_axes")
             for i, axis in enumerate(("x", "y", "z")):
                 if axis not in homed_axes:
-                    self.labels[f"pos_{axis}"].set_text(f"{axis.upper()}: ?")
+                    self.labels[f"pos_{axis}"].set_label(f"{axis.upper()}: ?")
                 elif "gcode_move" in data and "gcode_position" in data["gcode_move"]:
-                    self.labels[f"pos_{axis}"].set_text(
+                    self.labels[f"pos_{axis}"].set_label(
                         f"{axis.upper()}: {data['gcode_move']['gcode_position'][i]:.2f}"
                     )
 
@@ -258,7 +264,7 @@ class Panel(ScreenPanel):
         script = f"{KlippyGcodes.MOVE_RELATIVE}\nG0 {axis}{dist} F{speed}"
         self._screen._send_action(widget, "printer.gcode.script", {"script": script})
         if self._printer.get_stat("gcode_move", "absolute_coordinates"):
-            self._screen._ws.klippy.gcode_script("G90")
+            self._screen._ws.api.gcode_script("G90")
 
     def home(self, widget):
         if "delta" in self._printer.get_config_section("printer")["kinematics"]:

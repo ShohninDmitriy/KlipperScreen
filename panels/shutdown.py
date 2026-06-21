@@ -1,11 +1,11 @@
 import logging
-import os
 
 import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
+from ks_includes.functions import run_systemctl
 from ks_includes.screen_panel import ScreenPanel
 
 
@@ -43,7 +43,7 @@ class Panel(ScreenPanel):
             "error",
         }
         show_power_shortcut = False
-        if self.ks_printer_cfg is not None and self._screen._ws.connected:
+        if self.ks_printer_cfg is not None and self._screen.state.connected:
             power_devices = self.ks_printer_cfg.get("power_devices", "")
             if power_devices and self._printer.get_power_devices():
                 show_power_shortcut = True
@@ -70,11 +70,7 @@ class Panel(ScreenPanel):
             label.set_label(_("Are you sure you wish to shutdown the system?"))
             title = _("Shutdown")
         buttons = []
-        if (
-            self._screen.apiclient is None
-            or "127.0.0.1" in self._screen.apiclient.endpoint
-            or "localhost" in self._screen.apiclient.endpoint
-        ):
+        if self._screen.state.printer_is_local:
             buttons.append(
                 {
                     "name": _("Accept"),
@@ -83,7 +79,7 @@ class Panel(ScreenPanel):
                 }
             )
         else:
-            logging.info(self._screen.apiclient.endpoint)
+            logging.info(self._screen.restApi.endpoint)
             buttons.extend(
                 [
                     {"name": _("Host"), "response": Gtk.ResponseType.OK, "style": "dialog-info"},
@@ -106,18 +102,36 @@ class Panel(ScreenPanel):
 
     def reboot_poweroff_confirm(self, dialog, response_id, method):
         self._gtk.remove_dialog(dialog)
+
         if response_id == Gtk.ResponseType.ACCEPT:
             if method == "reboot":
                 self._screen._ws.send_method("machine.reboot")
-                os.system("systemctl reboot -i")
+                ret, err = run_systemctl("reboot")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to reboot host: {err if err else f'exit code {ret}'}"
+                    )
             else:
+                self.turn_off_power_devices()
                 self._screen._ws.send_method("machine.shutdown")
-                os.system("systemctl poweroff -i")
+                ret, err = run_systemctl("poweroff")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to power off host: {err if err else f'exit code {ret}'}"
+                    )
         elif response_id == Gtk.ResponseType.OK:
             if method == "reboot":
-                os.system("systemctl reboot -i")
+                ret, err = run_systemctl("reboot")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to reboot host: {err if err else f'exit code {ret}'}"
+                    )
             else:
-                os.system("systemctl poweroff -i")
+                ret, err = run_systemctl("poweroff")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to power off host: {err if err else f'exit code {ret}'}"
+                    )
         elif response_id == Gtk.ResponseType.APPLY:
             if method == "reboot":
                 self._screen._ws.send_method("machine.reboot")
@@ -126,7 +140,7 @@ class Panel(ScreenPanel):
                 self._screen._ws.send_method("machine.shutdown")
 
     def turn_off_power_devices(self):
-        if self.ks_printer_cfg is not None and self._screen._ws.connected:
+        if self.ks_printer_cfg is not None and self._screen.state.connected:
             power_devices = self.ks_printer_cfg.get("power_devices", "")
             if power_devices and self._printer.get_power_devices():
                 logging.info(f"Turning off associated power devices: {power_devices}")

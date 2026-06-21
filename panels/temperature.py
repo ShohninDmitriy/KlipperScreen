@@ -152,15 +152,15 @@ class Panel(ScreenPanel):
                     target -= int(self.tempdelta)
                     target = max(target, 0)
                 if heater.startswith("extruder"):
-                    self._screen._ws.klippy.set_tool_temp(
+                    self._screen._ws.api.set_tool_temp(
                         self._printer.get_tool_number(heater), target
                     )
                 elif heater.startswith("heater_bed"):
-                    self._screen._ws.klippy.set_bed_temp(target)
+                    self._screen._ws.api.set_bed_temp(target)
                 elif heater.startswith("heater_generic "):
-                    self._screen._ws.klippy.set_heater_temp(name, target)
+                    self._screen._ws.api.set_heater_temp(name, target)
                 elif heater.startswith("temperature_fan "):
-                    self._screen._ws.klippy.set_temp_fan_temp(name, target)
+                    self._screen._ws.api.set_temp_fan_temp(name, target)
                 else:
                     logging.info(f"Unknown heater: {heater}")
                     self._screen.show_popup_message(_("Unknown Heater") + " " + heater)
@@ -171,7 +171,7 @@ class Panel(ScreenPanel):
         count = 0
         for device in self.devices:
             visible = self._config.get_config().getboolean(
-                f"graph {self._screen.connected_printer}", device, fallback=True
+                f"graph {self._screen.state.printer_name}", device, fallback=True
             )
             self.devices[device]["visible"] = visible
             self.labels["da"].set_showing(device, visible)
@@ -211,7 +211,7 @@ class Panel(ScreenPanel):
             current_extruder = self._printer.data["toolhead"]["extruder"]
             selection.append(current_extruder)
 
-        for heater in self.active_heaters:
+        for heater in list(self.active_heaters):
             if heater not in selection:
                 self.select_heater(None, heater)
         for heater in selection:
@@ -272,7 +272,7 @@ class Panel(ScreenPanel):
                     target = 0
                 if heater.startswith("extruder"):
                     if self.validate(heater, target, max_temp):
-                        self._screen._ws.klippy.set_tool_temp(
+                        self._screen._ws.api.set_tool_temp(
                             self._printer.get_tool_number(heater), target
                         )
                 elif heater.startswith("heater_bed"):
@@ -280,19 +280,19 @@ class Panel(ScreenPanel):
                         with suppress(KeyError):
                             target = self.preheat_options[setting]["bed"]
                     if self.validate(heater, target, max_temp):
-                        self._screen._ws.klippy.set_bed_temp(target)
+                        self._screen._ws.api.set_bed_temp(target)
                 elif heater.startswith("heater_generic "):
                     if target is None:
                         with suppress(KeyError):
                             target = self.preheat_options[setting]["heater_generic"]
                     if self.validate(heater, target, max_temp):
-                        self._screen._ws.klippy.set_heater_temp(name, target)
+                        self._screen._ws.api.set_heater_temp(name, target)
                 elif heater.startswith("temperature_fan "):
                     if target is None:
                         with suppress(KeyError):
                             target = self.preheat_options[setting]["temperature_fan"]
                     if self.validate(heater, target, max_temp):
-                        self._screen._ws.klippy.set_temp_fan_temp(name, target)
+                        self._screen._ws.api.set_temp_fan_temp(name, target)
             # This small delay is needed to properly update
             # the target if user configured something above
             # and then changed the target using preheat gcode
@@ -315,12 +315,6 @@ class Panel(ScreenPanel):
         return False
 
     def add_device(self, device):
-        logging.info(f"Adding device: {device}")
-
-        temperature = self._printer.get_stat(device, "temperature")
-        if temperature is None:
-            return False
-
         devname = device.split()[1] if len(device.split()) > 1 else device
         # Support for hiding devices by name
         if devname.startswith("_"):
@@ -328,6 +322,10 @@ class Panel(ScreenPanel):
         if devname.lower() in self.hidden_sensors:
             return False
 
+        temperature = self._printer.get_stat(device, "temperature")
+        if temperature is None:
+            return False
+        logging.info(f"Adding device: {device}")
         if device.startswith("extruder"):
             if self._printer.extrudercount > 1:
                 image = f"extruder-{device[8:]}" if device[8:] else "extruder-0"
@@ -366,7 +364,7 @@ class Panel(ScreenPanel):
         name.set_alignment(0, 0.5)
         name.get_style_context().add_class(class_name)
         visible = self._config.get_config().getboolean(
-            f"graph {self._screen.connected_printer}", device, fallback=True
+            f"graph {self._screen.state.printer_name}", device, fallback=True
         )
         if visible:
             name.get_style_context().add_class("graph_label")
@@ -427,7 +425,7 @@ class Panel(ScreenPanel):
         self.devices[device]["visible"] ^= True
         logging.info(f"Graph show {self.devices[device]['visible']}: {device}")
 
-        section = f"graph {self._screen.connected_printer}"
+        section = f"graph {self._screen.state.printer_name}"
         if section not in self._config.get_config().sections():
             self._config.get_config().add_section(section)
         self._config.set(section, f"{device}", f"{self.devices[device]['visible']}")
@@ -449,15 +447,15 @@ class Panel(ScreenPanel):
             return
 
         if self.active_heater.startswith("extruder"):
-            self._screen._ws.klippy.set_tool_temp(
+            self._screen._ws.api.set_tool_temp(
                 self._printer.get_tool_number(self.active_heater), temp
             )
         elif self.active_heater == "heater_bed":
-            self._screen._ws.klippy.set_bed_temp(temp)
+            self._screen._ws.api.set_bed_temp(temp)
         elif self.active_heater.startswith("heater_generic "):
-            self._screen._ws.klippy.set_heater_temp(name, temp)
+            self._screen._ws.api.set_heater_temp(name, temp)
         elif self.active_heater.startswith("temperature_fan "):
-            self._screen._ws.klippy.set_temp_fan_temp(name, temp)
+            self._screen._ws.api.set_temp_fan_temp(name, temp)
         else:
             logging.info(f"Unknown heater: {self.active_heater}")
             self._screen.show_popup_message(_("Unknown Heater") + " " + self.active_heater)
@@ -575,16 +573,18 @@ class Panel(ScreenPanel):
     def process_update(self, action, data):
         if action != "notify_status_update":
             return
-        for x in self._printer.get_temp_devices():
-            if x in data:
-                if x not in self.devices:
-                    self.add_device(x)
-                self.update_temp(
-                    x,
-                    self._printer.get_stat(x, "temperature"),
-                    self._printer.get_stat(x, "target"),
-                    self._printer.get_stat(x, "power"),
-                )
+
+        for device in self._printer.get_temp_devices():
+            if device not in data:
+                continue
+            if device not in self.devices and not self.add_device(device):
+                return
+            self.update_temp(
+                device,
+                self._printer.get_stat(device, "temperature"),
+                self._printer.get_stat(device, "target"),
+                self._printer.get_stat(device, "power"),
+            )
 
     def show_numpad(self, widget, device=None):
         for d in self.active_heaters:

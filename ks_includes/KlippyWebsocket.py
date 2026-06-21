@@ -10,7 +10,7 @@ import websocket
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib
 
-from ks_includes.KlippyGcodes import KlippyGcodes
+from ks_includes.MoonrakerApi import MoonrakerApi
 
 
 class KlippyWebsocket(threading.Thread):
@@ -19,12 +19,40 @@ class KlippyWebsocket(threading.Thread):
     connecting = False
     callback_table = {}
 
+    @staticmethod
+    def _format_error(error):
+        if not error:
+            return ""
+        error_str = str(error)
+        if "opcode=8" in error_str and "data=b'" in error_str:
+            try:
+                start = error_str.index("data=b'") + len("data=b'")
+                end = error_str.index("'", start)
+                payload = error_str[start:end]
+                raw = payload.encode("latin1").decode("unicode_escape").encode("latin1")
+                if len(raw) >= 2:
+                    message = raw[2:].decode("utf-8", errors="ignore").strip()
+                    return message
+            except Exception:
+                pass
+        if error_str.startswith("[Errno "):
+            end = error_str.find("] ")
+            if end != -1:
+                error_str = error_str[end + 2 :]
+        return error_str
+
+    @staticmethod
+    def _format_close(status, message):
+        if message:
+            return f"Connection closed: {message}"
+        return ""
+
     def __init__(self, callback, host, port, api_key, path="", ssl=None):
         threading.Thread.__init__(self)
         self._wst = None
         self.ws_url = None
         self._callback = callback
-        self.klippy = MoonrakerApi(self)
+        self.api = MoonrakerApi(self)
         self.ws = None
         self.closing = False
         self.host = host
@@ -133,9 +161,7 @@ class KlippyWebsocket(threading.Thread):
         else:
             status = args[0]
             message = args[1]
-        info = ""
-        if message is not None:
-            info = f"{status} {message}"
+        info = self._format_close(status, message)
         if "on_close" in self._callback:
             GLib.idle_add(self._callback["on_close"], info, priority=GLib.PRIORITY_HIGH_IDLE)
         logging.info("Moonraker Websocket Closed")
@@ -144,159 +170,6 @@ class KlippyWebsocket(threading.Thread):
 
     def on_error(self, *args):
         error = args[1] if len(args) == 2 else args[0]
+        formatted = self._format_error(error)
         if "on_error" in self._callback:
-            GLib.idle_add(self._callback["on_error"], error, priority=GLib.PRIORITY_HIGH_IDLE)
-
-
-class MoonrakerApi:
-    def __init__(self, ws):
-        self._ws = ws
-
-    def emergency_stop(self):
-        logging.info("Sending printer.emergency_stop")
-        return self._ws.send_method("printer.emergency_stop")
-
-    def gcode_script(self, script, callback=None, *args):
-        logging.debug(f"Sending printer.gcode.script: {script}")
-        return self._ws.send_method("printer.gcode.script", {"script": script}, callback, *args)
-
-    def get_file_dir(self, path="gcodes", callback=None, *args):
-        logging.debug(f"Sending server.files.directory {path}")
-        return self._ws.send_method("server.files.list", {"path": path}, callback, *args)
-
-    def get_file_list(self, callback=None, *args):
-        logging.debug("Sending server.files.list")
-        return self._ws.send_method("server.files.list", {}, callback, *args)
-
-    def get_dir_info(self, callback=None, directory="gcodes", *args):
-        logging.debug(f"Sending server.files.get_directory  {directory}")
-        return self._ws.send_method(
-            "server.files.get_directory", {"path": directory}, callback, *args
-        )
-
-    def get_file_metadata(self, filename, callback=None, *args):
-        return self._ws.send_method(
-            "server.files.metadata", {"filename": filename}, callback, *args
-        )
-
-    def object_subscription(self, updates):
-        logging.debug("Sending printer.objects.subscribe")
-        return self._ws.send_method("printer.objects.subscribe", updates)
-
-    def power_device_off(self, devices, callback=None, *args):
-        result = {item: None for item in devices}
-        logging.debug(f"Sending machine.device_power.off: {result}")
-        return self._ws.send_method("machine.device_power.off", result, callback, *args)
-
-    def power_device_on(self, devices, callback=None, *args):
-        result = {item: None for item in devices}
-        logging.debug(f"Sending machine.device_power.on: {result}")
-        return self._ws.send_method("machine.device_power.on", result, callback, *args)
-
-    def print_cancel(self, callback=None, *args):
-        logging.debug("Sending printer.print.cancel")
-        return self._ws.send_method("printer.print.cancel", {}, callback, *args)
-
-    def print_pause(self, callback=None, *args):
-        logging.debug("Sending printer.print.pause")
-        return self._ws.send_method("printer.print.pause", {}, callback, *args)
-
-    def print_resume(self, callback=None, *args):
-        logging.debug("Sending printer.print.resume")
-        return self._ws.send_method("printer.print.resume", {}, callback, *args)
-
-    def print_start(self, filename, callback=None, *args):
-        logging.debug("Sending printer.print.start")
-        return self._ws.send_method("printer.print.start", {"filename": filename}, callback, *args)
-
-    def set_bed_temp(self, target, callback=None, *args):
-        logging.debug(f"Sending set_bed_temp: {KlippyGcodes.set_bed_temp(target)}")
-        return self._ws.send_method(
-            "printer.gcode.script", {"script": KlippyGcodes.set_bed_temp(target)}, callback, *args
-        )
-
-    def set_heater_temp(self, heater, target, callback=None, *args):
-        logging.debug(f"Sending heater {heater} to temp: {target}")
-        return self._ws.send_method(
-            "printer.gcode.script",
-            {"script": KlippyGcodes.set_heater_temp(heater, target)},
-            callback,
-            *args,
-        )
-
-    def set_temp_fan_temp(self, temp_fan, target, callback=None, *args):
-        logging.debug(f"Sending temperature fan {temp_fan} to temp: {target}")
-        return self._ws.send_method(
-            "printer.gcode.script",
-            {"script": KlippyGcodes.set_temp_fan_temp(temp_fan, target)},
-            callback,
-            *args,
-        )
-
-    def set_tool_temp(self, tool, target, callback=None, *args):
-        logging.debug(f"Sending set_tool_temp: {KlippyGcodes.set_ext_temp(target, tool)}")
-        return self._ws.send_method(
-            "printer.gcode.script",
-            {"script": KlippyGcodes.set_ext_temp(target, tool)},
-            callback,
-            *args,
-        )
-
-    def restart(self):
-        logging.debug("Sending printer.restart")
-        return self._ws.send_method("printer.restart")
-
-    def restart_firmware(self):
-        logging.debug("Sending printer.firmware_restart")
-        return self._ws.send_method("printer.firmware_restart")
-
-    def identify_client(self, version, api_key):
-        logging.debug("Sending server.connection.identify")
-        return self._ws.send_method(
-            "server.connection.identify",
-            {
-                "client_name": "KlipperScreen",
-                "version": f"{version}",
-                "type": "display",
-                "url": "https://github.com/KlipperScreen/KlipperScreen",
-                "api_key": f"{api_key}",
-            },
-        )
-
-    def query_server_info(self, callback=None, *args):
-        return self._ws.send_method("server.info", {}, callback, *args)
-
-    def list_webcams(self, callback=None, *args):
-        return self._ws.send_method("server.webcams.list", {}, callback, *args)
-
-    def get_power_devices(self, callback=None, *args):
-        return self._ws.send_method("machine.device_power.devices", {}, callback, *args)
-
-    def get_printer_info(self, callback=None, *args):
-        return self._ws.send_method("printer.info", {}, callback, *args)
-
-    def query_configfile(self, callback=None, *args):
-        return self._ws.send_method(
-            "printer.objects.query", {"objects": {"configfile": None}}, callback, *args
-        )
-
-    def query_objects(self, objects, callback=None, *args):
-        return self._ws.send_method("printer.objects.query", {"objects": objects}, callback, *args)
-
-    def get_printer_objects(self, callback=None, *args):
-        return self._ws.send_method("printer.objects.list", {}, callback, *args)
-
-    def get_available_commands(self, callback=None, *args):
-        return self._ws.send_method("printer.gcode.help", {}, callback, *args)
-
-    def get_system_info(self, callback=None, *args):
-        return self._ws.send_method("machine.system_info", {}, callback, *args)
-
-    def get_single_job_history(self, uid, callback=None, *args):
-        return self._ws.send_method("server.history.get_job", {"uid": uid}, callback, *args)
-
-    def get_temperature_store(self, callback=None, *args):
-        return self._ws.send_method("server.temperature_store", {}, callback, *args)
-
-    def get_server_config(self, callback=None, *args):
-        return self._ws.send_method("server.config", {}, callback, *args)
+            GLib.idle_add(self._callback["on_error"], formatted, priority=GLib.PRIORITY_HIGH_IDLE)

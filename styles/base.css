@@ -151,11 +151,14 @@ combobox button {
 
 combobox arrow {
     min-width: 1em;
-    background-color: @bg;
 }
 
 combobox arrow:disabled {
 -gtk-icon-source: None;
+}
+
+combobox window.popup arrow {
+    background-color: transparent;
 }
 
 cellview {
@@ -299,9 +302,13 @@ trough {
     margin: 0 .1em;
 }
 
+.prompt {
+    padding: 0.25em 2.5em;
+}
+
 .dialog {
     border: .1em solid @text-inv;
-    padding: 2.5em;
+    padding: 0.25em 2.5em;
     background-color: @text-inv;
     margin: 1em;
 }
@@ -683,4 +690,30 @@ keyboard_box {
 
 .spool_icon {
     padding-right: .5em;
+}
+
+.endstop {
+    padding: 0.5em;
+    border-radius: .5em;
+    margin: 0.5em 1em;
+}
+
+.endstop-open {
+    background-color: @echo;
+}
+
+.endstop-triggered {
+    background-color: @error;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.monospaced {
+    font-family: monospace;
 }

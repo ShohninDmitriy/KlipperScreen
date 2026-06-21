@@ -453,6 +453,9 @@ class Panel(ScreenPanel):
             self.update_active_spool(data["spool_id"])
             if self.active_spool_id is not None:
                 GLib.idle_add(self._scroll_to_active, self.active_spool_id)
+        if action == "notify_spoolman_status_changed":
+            if data.get("spoolman_connected", False):
+                self.load_spools()
 
     def update_active_spool(self, spool_id=None):
         if not self._treeview:
@@ -462,7 +465,9 @@ class Panel(ScreenPanel):
         model = self._treeview.get_model()
         for row in model:
             spool = row[0]
-            if spool and (spool.id == current_id or spool.id == self._prev_active_id):
+            if not spool:
+                continue
+            if current_id is None or spool.id == current_id or spool.id == self._prev_active_id:
                 model.row_changed(row.path, row.iter)
 
         self._treeview.queue_draw()

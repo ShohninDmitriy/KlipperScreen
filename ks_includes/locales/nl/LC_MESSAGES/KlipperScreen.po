@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-15 20:03-0300\n"
-"PO-Revision-Date: 2025-04-29 16:26+0000\n"
-"Last-Translator: Themechanic1987 <Nigel_andreas@hotmail.com>\n"
+"POT-Creation-Date: 2026-06-10 20:07-0300\n"
+"PO-Revision-Date: 2026-06-09 10:54+0000\n"
+"Last-Translator: Boris <borisdb@gmail.com>\n"
 "Language-Team: Dutch <https://hosted.weblate.org/projects/klipperscreen/"
 "klipperscreen/nl/>\n"
 "Language: nl\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12-dev\n"
+"X-Generator: Weblate 2026.6\n"
 
 msgid "Main Menu"
 msgstr "Hoofd Menu"
@@ -172,8 +172,13 @@ msgstr "24 Uurs Tijd"
 msgid "Disable for 12hs with am / pm"
 msgstr "Uitschakelen gedurende 12 uur met am / pm"
 
-msgid "Macro shortcut on sidebar"
-msgstr "Macro snelkoppeling in sidebar"
+#, fuzzy
+msgid "Action bar Shortcut"
+msgstr "Snelkoppeling actiebalk"
+
+#, fuzzy
+msgid "LEDs"
+msgstr "LED's"
 
 msgid "Font Size"
 msgstr "Lettertype Grootte"
@@ -287,6 +292,15 @@ msgid_plural "minutes"
 msgstr[0] "minuut"
 msgstr[1] "minuten"
 
+msgid "Temperature too low to extrude"
+msgstr "Temperatuur te laag voor extrude"
+
+msgid "Klipper will reboot"
+msgstr "Klipper zal herstarten"
+
+msgid "Save configuration?"
+msgstr "Configuratie opslaan?"
+
 msgid "Are you sure you want to run Emergency Stop?"
 msgstr "Weet je zeker dat je de Noodstop wilt inschakelen?"
 
@@ -357,7 +371,7 @@ msgid "Updating"
 msgstr "Bezig met updaten"
 
 msgid "Disable Motors"
-msgstr "Motors Uitschakelen"
+msgstr "Motoren Uitschakelen"
 
 msgid "Screws Adjust"
 msgstr "Schroeven Aanpassen"
@@ -524,14 +538,8 @@ msgstr "Meet Y"
 msgid "Measure Both"
 msgstr "Meet Beide"
 
-msgid "Klipper will reboot"
-msgstr "Klipper zal herstarten"
-
-msgid "Save configuration?"
-msgstr "Configuratie opslaan?"
-
 msgid "Check ADXL Wiring"
-msgstr "Controleer AXDL Bedrading"
+msgstr "Controleer ADXL Bedrading"
 
 msgid "ADXL Not Configured"
 msgstr "ADXL Niet Geconfigureerd"
@@ -555,7 +563,7 @@ msgid "mm³/s"
 msgstr "mm³/s"
 
 msgid "Left:"
-msgstr "Links:"
+msgstr "Resterend:"
 
 msgid "Elapsed:"
 msgstr "Verstreken:"
@@ -716,17 +724,37 @@ msgstr "Enkel voor het bewegingspaneel"
 msgid "Z Speed (mm/s)"
 msgstr "Z Snelheid (mm/s)"
 
+#, fuzzy
+msgid "Advanced Move"
+msgstr "Geavanceerde beweging"
+
+#, fuzzy
+msgid "Query Endstops"
+msgstr "Eindstops opvragen"
+
+#, fuzzy
+msgid "Invalid position"
+msgstr "Ongeldige positie"
+
 msgid "Failed to initialize"
 msgstr "Kan niet initialiseren"
 
 msgid "Interface"
 msgstr "Interface"
 
-msgid "No wireless interface has been found"
-msgstr "Geen draadloze netwerk interface gevonden"
+#, fuzzy
+msgid "No network devices have been found"
+msgstr "Geen netwerkapparaten gevonden"
+
+#, fuzzy
+msgid "No network devices available"
+msgstr "Geen netwerkapparaten beschikbaar"
 
 msgid "Connected"
 msgstr "Verbonden"
+
+msgid "Channel"
+msgstr "Kanaal"
 
 #, python-format
 msgid "Do you want to forget or disconnect %s?"
@@ -748,9 +776,6 @@ msgstr "Gebruiker"
 msgid "Connecting to %s"
 msgstr "Verbinden met %s"
 
-msgid "Channel"
-msgstr "Kanaal"
-
 msgid "Hostname"
 msgstr "Hostnaam"
 
@@ -763,9 +788,8 @@ msgstr "Pressure advance"
 msgid "Current"
 msgstr "Huidige"
 
-#, fuzzy
 msgid "Smooth time"
-msgstr "Vlotte tijd"
+msgstr "Afvlak Tijd"
 
 msgid "s"
 msgstr "s"
@@ -1045,6 +1069,10 @@ msgstr "Onderste Nozzle"
 msgid "Abort"
 msgstr "Annuleer"
 
+#, fuzzy
+msgid "Calibration commands not available yet"
+msgstr "Kalibratiecommando's nog niet beschikbaar"
+
 msgid "Error: Couldn't get a position to probe"
 msgstr "Error: kon geen probe positie vinden"
 
@@ -1100,25 +1128,6 @@ msgid "Klipper has shutdown"
 msgstr "Klipper is afgesloten"
 
 #, fuzzy
-msgid "No eligible macros:"
-msgstr "Geen geschikte macros:"
-
-msgid "macros with a name starting with '_' are hidden"
-msgstr "macro's die beginnen met '_' zijn verborgen"
-
-msgid "macros that use 'rename_existing' are hidden"
-msgstr "Macro's die 'rename_existing' gebruiken zijn verborgen"
-
-msgid ""
-"LOAD_FILAMENT/UNLOAD_FILAMENT are hidden and should be used from extrude"
-msgstr ""
-"LOAD_FILAMENT/UNLOAD_FILAMENT zijn verborgen en kunnen worden gebruikt in "
-"extrude"
-
-msgid "Temperature too low to extrude"
-msgstr "Temperatuur te laag voor extrude"
-
-#, fuzzy
 msgid "Waiting for Moonraker Websocket to close"
 msgstr "Wachten tot Moonraker Websocket sluit"
 
@@ -1129,97 +1138,6 @@ msgstr "Moonraker: verbonden"
 msgid "Initializing Klipper Connection"
 msgstr "Klipper-verbinding initialiseren"
 
-#~ msgid "Last Used"
-#~ msgstr "Laatst Gebruikt"
-
 #, fuzzy
-#~ msgid "Last used"
-#~ msgstr "Laatst gebruikt"
-
-#~ msgid "Error getting active spool"
-#~ msgstr "Error krijgen actieve spoel"
-
-#~ msgid "Cannot connect to Moonraker"
-#~ msgstr "Kan geen verbinding met Moonraker maken"
-
-#~ msgid "Lost Connection to Moonraker"
-#~ msgstr "Verbinding met Moonraker verbroken"
-
-#~ msgid "Max:"
-#~ msgstr "Max:"
-
-#~ msgid "Password saved"
-#~ msgstr "Wachtwoord opgeslagen"
-
-#~ msgid "Hide temp."
-#~ msgstr "Verberg temp."
-
-#~ msgid "PSK for"
-#~ msgstr "PSK voor"
-
-#~ msgid "Mesh calibrate"
-#~ msgstr "Mesh kalibreren"
-
-#~ msgid "Uploaded"
-#~ msgstr "Geupload"
-
-#~ msgid "Ended official support in June 2023"
-#~ msgstr "Ondersteuning officieel beëindigt in juni 2023"
-
-#~ msgid "Hidden"
-#~ msgstr "Verborgen"
-
-#~ msgid "KlipperScreen will drop support in June 2024"
-#~ msgstr "KlipperScreen ondersteuning wordt in juni 2024 beëindigt"
-
-#~ msgid "Print Time"
-#~ msgstr "Print Tijd"
-
-#~ msgid "Warning"
-#~ msgstr "Waarschuwing"
-
-#~ msgid "dBm"
-#~ msgstr "dBm"
-
-#~ msgid "Deselect"
-#~ msgstr "Deselecteer"
-
-#~ msgid "Select"
-#~ msgstr "Selecteer"
-
-#~ msgid "Bed screw configuration:"
-#~ msgstr "Bed schroef configuratie:"
-
-#~ msgid ""
-#~ "Not supported for auto-detection, it needs to be configured in "
-#~ "klipperscreen.conf"
-#~ msgstr ""
-#~ "Niet ondersteunt voor auto-detectie, dit moet worden geconfigureerd in "
-#~ "klipperscreen.conf"
-
-#~ msgid "Unknown screw position"
-#~ msgstr "Onbekende schroef positie"
-
-#~ msgid "Max Acceleration to Deceleration"
-#~ msgstr "Max Acceleratie naar De-acceleratie"
-
-#~ msgid "Continue"
-#~ msgstr "Doorgaan"
-
-#~ msgid "Fullscreen"
-#~ msgstr "Volledig Scherm"
-
-#~ msgid "Actions"
-#~ msgstr "Acties"
-
-#~ msgid "Configuration"
-#~ msgstr "Configuratie"
-
-#~ msgid "Homing"
-#~ msgstr "Homing"
-
-#~ msgid "Disable XY"
-#~ msgstr "XY Uitschakelen"
-
-#~ msgid "Slicer Time correction (%)"
-#~ msgstr "Slicer Tijd correctie (%)"
+msgid "Klipper not responding after multiple attempts"
+msgstr "Klipper reageert niet na meerdere pogingen"

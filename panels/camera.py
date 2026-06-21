@@ -52,11 +52,16 @@ class Panel(ScreenPanel):
             self.mpv.terminate()
             self.mpv = None
 
+    def process_update(self, action, data):
+        if action != "notify_webcams_changed":
+            return
+        self._screen.panels_reinit.append("camera")
+
     def play(self, widget, cam):
         url = cam["stream_url"]
         if url.startswith("/"):
             logging.info("camera URL is relative")
-            endpoint = self._screen.apiclient.endpoint.split(":")
+            endpoint = self._screen.restApi.endpoint.split(":")
             url = f"{endpoint[0]}:{endpoint[1]}{url}"
         if "/webrtc" in url:
             self._screen.show_popup_message(
@@ -112,6 +117,7 @@ class Panel(ScreenPanel):
             or "GBM" in message  # will fall back to other vo automatically
             or "open TTY for VT control" in message  # not important to notify in the UI
             or "youtube-dl" in message  # needed for some streams, not relevant for our case
+            or "yt-dlp" in message  # needed for some streams, not relevant for our case
         ):
             return
         if loglevel == "error":

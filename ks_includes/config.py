@@ -7,6 +7,7 @@ import logging
 import os
 import pathlib
 import re
+import traceback  # noqa
 from io import StringIO
 
 SCREEN_BLANKING_OPTIONS = [
@@ -194,7 +195,7 @@ class KlipperScreenConfig:
                     "autoclose_popups",
                     "use_dpms",
                     "use_default_menu",
-                    "side_macro_shortcut",
+                    "side_macro_shortcut",  # Deprecated
                     "use-matchbox-keyboard",
                     "show_heater_power",
                     "show_scroll_steppers",
@@ -215,6 +216,7 @@ class KlipperScreenConfig:
                     "screen_off_devices",
                     "print_view",
                     "lock_password",
+                    "side_shortcut_target",
                 )
                 numbers = (
                     "job_complete_timeout",
@@ -263,12 +265,11 @@ class KlipperScreenConfig:
                 numbers = [f"{option}" for option in config[section] if option != "gcode"]
             elif section.startswith("menu "):
                 strs = ("name", "icon", "panel", "method", "params", "enable", "confirm", "style")
-            elif (
-                section.startswith("graph")
-                or section.startswith("displayed_macros")
-                or section.startswith("spoolman")
-            ):
+            elif section.startswith("graph") or section.startswith("displayed_macros"):
                 bools = [f"{option}" for option in config[section]]
+            elif section.startswith("spoolman"):
+                numbers = ("sync_rate", "spool_low_limit")
+                bools = "hide_archived"
             else:
                 self.errors.append(f"Section [{section}] not recognized")
 
@@ -387,12 +388,19 @@ class KlipperScreenConfig:
                 }
             },
             {
-                "side_macro_shortcut": {
+                "side_shortcut_target": {
                     "section": "main",
-                    "name": _("Macro shortcut on sidebar"),
-                    "type": "binary",
-                    "value": "False",
-                    "callback": screen.toggle_shortcut,
+                    "name": _("Action bar Shortcut"),
+                    "type": "dropdown",
+                    "value": "notifications",
+                    "callback": screen.update_shortcut,
+                    "options": [
+                        {"name": _("Notifications"), "value": "notifications"},
+                        {"name": _("Lock"), "value": "lock_screen"},
+                        {"name": _("Macros"), "value": "gcode_macros"},
+                        {"name": _("Camera"), "value": "camera"},
+                        {"name": _("LEDs"), "value": "led"},
+                    ],
                 }
             },
             {
@@ -606,6 +614,10 @@ class KlipperScreenConfig:
                 {"name": name, "value": f"{num}"}
             )
 
+        # Migrate old side_macro_shortcut to side_shortcut_target
+        if self.config.getboolean("main", "side_macro_shortcut", fallback=False):
+            self.config.set("main", "side_shortcut_target", "gcode_macros")
+
         for item in self.configurable_options:
             name = list(item)[0]
             vals = item[name]
@@ -808,12 +820,15 @@ class KlipperScreenConfig:
         extra_sections.extend([i for i in self.config.sections() if i.startswith("spoolman")])
         for section in extra_sections:
             for item in self.config.options(section):
-                value = self.config[section].getboolean(item, fallback=True)
+                try:
+                    value = self.config[section].getboolean(item, fallback=True)
+                except (ValueError, TypeError):
+                    value = self.config[section].get(item)
                 if value is False or (
-                    self.user_cfg is not None
+                    value is not None
+                    and self.user_cfg is not None
                     and section in self.user_cfg.sections()
-                    and self.user_cfg[section].getboolean(item, fallback=True) is False
-                    and self.user_cfg[section].getboolean(item, fallback=True) != value
+                    and str(value) != self.user_cfg[section].get(item, str(value))
                 ):
                     if section not in save_config.sections():
                         save_config.add_section(section)

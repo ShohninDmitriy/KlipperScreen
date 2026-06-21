@@ -446,10 +446,10 @@ class Panel(ScreenPanel):
         self._gtk.remove_dialog(dialog)
         if response_id == Gtk.ResponseType.APPLY:
             if device == "probe":
-                self._screen._ws.klippy.gcode_script("Z_OFFSET_APPLY_PROBE")
+                self._screen._ws.api.gcode_script("Z_OFFSET_APPLY_PROBE")
             if device == "endstop":
-                self._screen._ws.klippy.gcode_script("Z_OFFSET_APPLY_ENDSTOP")
-            self._screen._ws.klippy.gcode_script("SAVE_CONFIG")
+                self._screen._ws.api.gcode_script("Z_OFFSET_APPLY_ENDSTOP")
+            self._screen._ws.api.gcode_script("SAVE_CONFIG")
 
     def restart(self, widget):
         buttons = [
@@ -468,8 +468,8 @@ class Panel(ScreenPanel):
         if self.filename:
             self.disable_button("restart")
             if self.state == "error":
-                self._screen._ws.klippy.gcode_script("SDCARD_RESET_FILE")
-            self._screen._ws.klippy.print_start(self.filename)
+                self._screen._ws.api.gcode_script("SDCARD_RESET_FILE")
+            self._screen._ws.api.print_start(self.filename)
             logging.info(f"Starting print: {self.filename}")
             self.new_print()
         else:
@@ -511,7 +511,7 @@ class Panel(ScreenPanel):
         logging.debug("Canceling print")
         self.set_state("cancelling")
         self.disable_button("pause", "resume", "cancel")
-        self._screen._ws.klippy.print_cancel()
+        self._screen._ws.api.print_cancel()
 
     def close_panel(self, widget=None):
         if self.can_close:
@@ -544,6 +544,7 @@ class Panel(ScreenPanel):
                 self.set_state("printing")
             return
         elif action == "notify_metadata_update" and data["filename"] == self.filename:
+            self._gtk.clear_file_image_cache()
             self.get_file_metadata(response=True)
         elif action != "notify_status_update":
             return
@@ -909,17 +910,29 @@ class Panel(ScreenPanel):
         if width <= 1 or height <= 1:
             width = max_width
             height = max_height
-        pixbuf = self.get_file_image(self.filename, width, height)
-        if pixbuf is None:
-            logging.debug("no pixbuf")
+        self.load_image_async(
+            self.filename, width, height, callback=lambda p: self._set_thumbnail(p)
+        )
+
+    def _set_thumbnail(self, pixbuf):
+        if not self.content.get_parent():
             return
         if image := find_widget(self.labels["thumbnail"], Gtk.Image):
             image.set_from_pixbuf(pixbuf)
 
     def show_fullscreen_thumbnail(self, widget):
-        pixbuf = self.get_file_image(
-            self.filename, self._screen.width * 0.9, self._screen.height * 0.75
+        width = self._screen.width * 0.9
+        height = self._screen.height * 0.75
+        self.load_image_async(
+            self.filename,
+            width,
+            height,
+            callback=lambda p: self._show_fullscreen_dialog(p, width, height),
         )
+
+    def _show_fullscreen_dialog(self, pixbuf, width, height):
+        if not self.content.get_parent():
+            return
         if pixbuf is None:
             return
         image = Gtk.Image.new_from_pixbuf(pixbuf)
@@ -981,7 +994,7 @@ class Panel(ScreenPanel):
                 f"{float(self.file_metadata['filament_total']) / 1000:.1f} m"
             )
         if "job_id" in self.file_metadata and self.file_metadata["job_id"]:
-            self._screen._ws.klippy.get_single_job_history(
+            self._screen._ws.api.get_single_job_history(
                 self.file_metadata["job_id"], self.set_last_time
             )
 

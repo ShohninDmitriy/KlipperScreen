@@ -3,7 +3,7 @@ import re
 
 
 class NotificationHandler:
-    """Handles routing of Moonraker websocket notifications"""
+    """Handles routing of Moonraker notifications"""
 
     def __init__(self, screen):
         self._screen = screen
@@ -17,6 +17,7 @@ class NotificationHandler:
             "notify_metadata_update": self._metadata_update,
             "notify_update_response": self._update_response,
             "notify_power_changed": self._power_changed,
+            "notify_webcams_changed": self._webcams_changed,
             "notify_gcode_response": self._gcode_response,
             "notify_active_spool_set": self._active_spool_set,
         }
@@ -36,7 +37,7 @@ class NotificationHandler:
         self._screen.printer.process_update({"webhooks": {"state": "shutdown"}})
 
     def _klippy_ready(self, data):
-        if not self._screen.initialized:
+        if not self._screen.state.initialized:
             self._screen.init_klipper()
             return True
         self._screen.printer.process_update({"webhooks": {"state": "ready"}})
@@ -64,6 +65,8 @@ class NotificationHandler:
 
     def _filelist_changed(self, data):
         if self._screen.files is not None:
+            if "action" in data and data["action"] == "modify_file":
+                self._screen.gtk.clear_file_image_cache()
             self._screen.files.process_update(data)
         return True
 
@@ -81,6 +84,12 @@ class NotificationHandler:
         logging.debug("Power status changed: %s", data)
         self._screen.printer.process_power_update(data)
         self._screen.panels["splash_screen"].check_power_status()
+
+    def _webcams_changed(self, data):
+        logging.debug("Webcams changed: %s", data)
+        self._screen.printer.configure_cameras(data["webcams"])
+        if "camera" in self._screen.panels:
+            self._screen.panels_reinit.append("camera")
 
     def _gcode_response(self, data):
         if self._screen.printer.state in ["error", "shutdown"]:

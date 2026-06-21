@@ -1,11 +1,11 @@
 import logging
-import os
 
 import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Pango
 
+from ks_includes.functions import run_systemctl
 from ks_includes.screen_panel import ScreenPanel
 
 
@@ -66,13 +66,13 @@ class Panel(ScreenPanel):
 
     def show_restart_buttons(self):
         self.clear_action_bar()
-        if self.ks_printer_cfg is not None and self._screen._ws.connected:
+        if self.ks_printer_cfg is not None and self._screen.state.connected:
             power_devices = self.ks_printer_cfg.get("power_devices", "")
             if power_devices and self._printer and self._printer.get_power_devices():
                 logging.info(f"Associated power devices: {power_devices}")
                 self.add_power_button(power_devices)
 
-        if self._screen.initialized:
+        if self._screen.state.initialized:
             self.labels["actions"].add(self.labels["restart"])
             self.labels["actions"].add(self.labels["firmware_restart"])
         else:
@@ -80,8 +80,8 @@ class Panel(ScreenPanel):
             self.labels["actions"].add(self.labels["shutdown"])
         self.labels["actions"].add(self.labels["menu"])
         if (
-            self._screen.reinit_count > self._screen.max_retries
-            or self._screen._klippy_retry_count > self._screen.max_retries
+            self._screen.state.reinit_count > self._screen.MAX_RETRIES
+            or self._screen.state.klippy_retry_count > self._screen.MAX_RETRIES
         ):
             self.labels["actions"].add(self.labels["retry"])
         self.labels["actions"].show_all()
@@ -107,16 +107,16 @@ class Panel(ScreenPanel):
                         self.labels["power"].set_sensitive(False)
 
     def firmware_restart(self, widget):
-        self._screen._ws.klippy.restart_firmware()
+        self._screen._ws.api.restart_firmware()
 
     def restart_klipper(self, widget):
-        self._screen._ws.klippy.restart()
+        self._screen._ws.api.restart()
 
     def retry(self, widget):
         logging.debug("User retrying connection")
-        self._screen.reinit_count = 0
-        self._screen._klippy_retry_count = 0
-        self._screen._init_printer(_("Connecting to %s") % self._screen.connecting_to_printer)
+        self._screen.state.reinit_count = 0
+        self._screen.state.klippy_retry_count = 0
+        self._screen._init_printer(_("Connecting to %s") % self._screen.state.printer_name)
         self.show_restart_buttons()
 
     def reboot_poweroff(self, widget, method):
@@ -139,7 +139,7 @@ class Panel(ScreenPanel):
                 "style": "dialog-error",
             },
         ]
-        if self._screen._ws.connected:
+        if self._screen.state.connected:
             buttons.insert(
                 1,
                 {
@@ -152,13 +152,27 @@ class Panel(ScreenPanel):
 
     def reboot_poweroff_confirm(self, dialog, response_id, method):
         self._gtk.remove_dialog(dialog)
+
         if response_id == Gtk.ResponseType.OK:
             if method == "reboot":
-                os.system("systemctl reboot -i")
+                ret, err = run_systemctl("reboot")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to reboot host: {err if err else f'exit code {ret}'}"
+                    )
             else:
-                os.system("systemctl poweroff -i")
+                ret, err = run_systemctl("poweroff")
+                if ret != 0:
+                    self._screen.show_popup_message(
+                        f"Failed to power off host: {err if err else f'exit code {ret}'}"
+                    )
         elif response_id == Gtk.ResponseType.APPLY:
             if method == "reboot":
                 self._screen._ws.send_method("machine.reboot")
             else:
+                if self.ks_printer_cfg is not None and self._screen.state.connected:
+                    power_devices = self.ks_printer_cfg.get("power_devices", "")
+                    if power_devices and self._printer.get_power_devices():
+                        logging.info(f"Turning off associated power devices: {power_devices}")
+                        self._screen.power_devices(widget=None, devices=power_devices, on=False)
                 self._screen._ws.send_method("machine.shutdown")

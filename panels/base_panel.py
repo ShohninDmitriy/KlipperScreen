@@ -34,6 +34,8 @@ class BasePanel(ScreenPanel):
         self.spoolman_update = None
         self.titlebar_items = []
         self.titlebar_name_type = None
+        self.titlebar_labels = {}
+        self.titlebar_populated = False
         self.spoolman_low_limit = 20
         self.spoolman_current_color = None
         self.current_extruder = None
@@ -60,13 +62,13 @@ class BasePanel(ScreenPanel):
         self.control["printer_select"].connect("clicked", self._screen.show_printer_select)
         self.control["printer_select"].set_no_show_all(True)
 
-        self.shorcut = {
-            "panel": "gcode_macros",
-            "icon": "custom-script",
-        }
-        self.control["shortcut"] = self._gtk.Button(self.shorcut["icon"], scale=self.abscale)
-        self.control["shortcut"].connect("clicked", self.menu_item_clicked, self.shorcut)
-        self.control["shortcut"].set_no_show_all(True)
+        self.shortcut = {}
+        self.shortcut["panel"] = self._config.get_main_config().get(
+            "side_shortcut_target", fallback="notifications"
+        )
+        self.shortcut["icon"] = self._get_shortcut_icon(self.shortcut["panel"])
+        self.control["shortcut"] = self._gtk.Button(self.shortcut["icon"], scale=self.abscale)
+        self.control["shortcut"].connect("clicked", self._shortcut_clicked, self.shortcut)
 
         # Any action bar button should close the keyboard
         for item in self.control:
@@ -225,8 +227,7 @@ class BasePanel(ScreenPanel):
         return default_color
 
     def show_titlebar_items(self):
-        if self.control["item_box"].get_children():
-            logging.warning("Titlebar items already populated")
+        if self.titlebar_populated:
             return
         if self._printer is None:
             logging.warning("Cannot load Titlebar items, printer not initialized")
@@ -237,15 +238,19 @@ class BasePanel(ScreenPanel):
                 return
             img_size = self._gtk.img_scale * self.bts
             for device in devices:
-                self.labels[device] = Gtk.Label(ellipsize=Pango.EllipsizeMode.START)
-                self.labels[f"{device}_box"] = Gtk.Box()
+                self.titlebar_labels[device] = Gtk.Label(ellipsize=Pango.EllipsizeMode.START)
+                self.titlebar_labels[f"{device}_box"] = Gtk.Box()
                 icon = self.get_icon(device, img_size)
                 if icon is not None:
-                    self.labels[f"{device}_box"].pack_start(icon, False, False, 3)
-                self.labels[f"{device}_box"].pack_start(self.labels[device], False, False, 0)
-                self.labels[f"{device}_eventbox"] = Gtk.EventBox()
-                self.labels[f"{device}_eventbox"].add(self.labels[f"{device}_box"])
-                self.labels[f"{device}_eventbox"].connect(
+                    self.titlebar_labels[f"{device}_box"].pack_start(icon, False, False, 3)
+                self.titlebar_labels[f"{device}_box"].pack_start(
+                    self.titlebar_labels[device], False, False, 0
+                )
+                self.titlebar_labels[f"{device}_eventbox"] = Gtk.EventBox()
+                self.titlebar_labels[f"{device}_eventbox"].add(
+                    self.titlebar_labels[f"{device}_box"]
+                )
+                self.titlebar_labels[f"{device}_eventbox"].connect(
                     "button-press-event", self.open_temp_panel, device
                 )
 
@@ -254,18 +259,20 @@ class BasePanel(ScreenPanel):
             n = 0
             if len(self._printer.get_tools()) > (nlimit - 1):
                 self.current_extruder = self._printer.get_stat("toolhead", "extruder")
-                if self.current_extruder and f"{self.current_extruder}_box" in self.labels:
-                    self.control["item_box"].add(self.labels[f"{self.current_extruder}_eventbox"])
+                if self.current_extruder and f"{self.current_extruder}_box" in self.titlebar_labels:
+                    self.control["item_box"].add(
+                        self.titlebar_labels[f"{self.current_extruder}_eventbox"]
+                    )
             else:
                 self.current_extruder = False
             for device in devices:
                 if n >= nlimit:
                     break
                 if device.startswith("extruder") and self.current_extruder is False:
-                    self.control["item_box"].add(self.labels[f"{device}_eventbox"])
+                    self.control["item_box"].add(self.titlebar_labels[f"{device}_eventbox"])
                     n += 1
                 elif device.startswith("heater"):
-                    self.control["item_box"].add(self.labels[f"{device}_eventbox"])
+                    self.control["item_box"].add(self.titlebar_labels[f"{device}_eventbox"])
                     n += 1
             for item in self.titlebar_items:
                 # Users can fill the bar if they want
@@ -277,8 +284,11 @@ class BasePanel(ScreenPanel):
                     continue
                 for device in devices:
                     name = device.split()[1] if len(device.split()) > 1 else device
-                    if name == item and self.labels[f"{device}_eventbox"].get_parent() is None:
-                        self.control["item_box"].add(self.labels[f"{device}_eventbox"])
+                    if (
+                        name == item
+                        and self.titlebar_labels[f"{device}_eventbox"].get_parent() is None
+                    ):
+                        self.control["item_box"].add(self.titlebar_labels[f"{device}_eventbox"])
                         n += 1
                         break
             if (
@@ -290,12 +300,18 @@ class BasePanel(ScreenPanel):
                 n += 1
 
             self.control["item_box"].show_all()
+            self.titlebar_populated = True
         except Exception as e:
             logging.debug(f"Couldn't create heaters box: {e}")
 
     def clear_titlebar_items(self):
-        for child in self.control["item_box"].get_children():
+        if self.spoolman_update is not None:
+            GLib.source_remove(self.spoolman_update)
+            self.spoolman_update = None
+        for child in list(self.control["item_box"].get_children()):
             self.control["item_box"].remove(child)
+        self.titlebar_labels.clear()
+        self.titlebar_populated = False
 
     def add_spoolman_box(self):
         self.control["item_box"].add(self.control["spoolman_box"])
@@ -337,7 +353,8 @@ class BasePanel(ScreenPanel):
 
     def set_spoolman_refresh(self):
         if self.spoolman_update is None:
-            self.spoolman_update = GLib.timeout_add_seconds(20, self.fetch_spoolman)
+            rate = self._config.get_config().getfloat("spoolman", "sync_rate", fallback=20)
+            self.spoolman_update = GLib.timeout_add_seconds(int(rate), self.fetch_spoolman)
 
     def get_printer_state(self):
         printing = self._printer and self._printer.state in {"printing", "paused"}
@@ -354,7 +371,7 @@ class BasePanel(ScreenPanel):
         printing, connected, printer_select = self.get_printer_state()
         self.control["estop"].set_visible(printing)
         self.control["shutdown"].set_visible(not printing)
-        self.show_shortcut(connected and not printer_select)
+        self.show_shortcut(self.shortcut["panel"])
         self.show_printer_select(len(self._config.get_printers()) > 1)
         for control in ("back", "home"):
             self.set_control_sensitive(len(self._screen._cur_panels) > 1, control=control)
@@ -385,7 +402,7 @@ class BasePanel(ScreenPanel):
             return
         remaining_weight = self._printer.active_spool["remaining_weight"]
         self.labels["spoolman_weight"].set_label(f"{round(remaining_weight):.0f} g")
-        self.update_spoolman_alert_visuals(remaining_weight < self.spoolman_low_limit)
+        self.update_spoolman_alert_visuals(remaining_weight <= self.spoolman_low_limit)
         color = self.get_active_spoolman_color()
         if color != self.spoolman_current_color:
             self.labels["spoolman_icon"].set_from_pixbuf(self.get_spoolman_icon_pixbuf(color))
@@ -398,7 +415,9 @@ class BasePanel(ScreenPanel):
             or self.control["spoolman_box"].get_parent() != self.control["item_box"]
         ):
             logging.debug("Stopping Spoolman updates")
-            self.spoolman_update = None
+            if self.spoolman_update is not None:
+                GLib.source_remove(self.spoolman_update)
+                self.spoolman_update = None
             return False
         self._screen.get_active_spool()
         return True
@@ -418,6 +437,18 @@ class BasePanel(ScreenPanel):
         if action == "notify_active_spool_set":
             self.update_spoolman_weight_label()
             return
+        if action == "notify_spoolman_status_changed":
+            connected = data.get("spoolman_connected", False)
+            self._printer.spoolman = connected
+            self.update_spoolman_weight_label()
+            if not connected:
+                if self.spoolman_update is not None:
+                    GLib.source_remove(self.spoolman_update)
+                    self.spoolman_update = None
+            elif self.spoolman_update is None and self._printer.active_spool:
+                if self.control["spoolman_box"].get_parent() == self.control["item_box"]:
+                    self.set_spoolman_refresh()
+            return
         if action == "notify_proc_stat_update":
             cpu = data["system_cpu_usage"]["cpu"]
             memory = (data["system_memory"]["used"] / data["system_memory"]["total"]) * 100
@@ -431,7 +462,7 @@ class BasePanel(ScreenPanel):
                 self.last_usage_report = datetime.now()
                 if not ctx.has_class(error):
                     ctx.add_class(error)
-                self._screen.log_notification(f"{self._screen.connecting_to_printer}: {msg}", 2)
+                self._screen.log_notification(f"{self._screen.state.printer_name}: {msg}", 2)
                 self.titlelbl.set_label(msg)
             elif ctx.has_class(error):
                 if (datetime.now() - self.last_usage_report).seconds < 5:
@@ -439,7 +470,7 @@ class BasePanel(ScreenPanel):
                     return
                 self.usage_report = 0
                 ctx.remove_class(error)
-                self.titlelbl.set_label(f"{self._screen.connecting_to_printer}")
+                self.titlelbl.set_label(f"{self._screen.state.printer_name}")
             return
 
         if action == "notify_update_response":
@@ -459,7 +490,7 @@ class BasePanel(ScreenPanel):
                         logging.error(
                             "error trying to show the updater button the dialog might be closed"
                         )
-                        self._screen.updating = False
+                        self._screen.state.updating = False
                         for dialog in self._screen.dialogs:
                             self._gtk.remove_dialog(dialog)
             return
@@ -470,7 +501,7 @@ class BasePanel(ScreenPanel):
             return
         for device in devices:
             temp = self._printer.get_stat(device, "temperature")
-            if temp and device in self.labels:
+            if temp and device in self.titlebar_labels:
                 name = ""
                 if not (device.startswith("extruder") or device.startswith("heater_bed")):
                     if self.titlebar_name_type == "full":
@@ -479,7 +510,7 @@ class BasePanel(ScreenPanel):
                     elif self.titlebar_name_type == "short":
                         name = device.split()[1] if len(device.split()) > 1 else device
                         name = f"{name[:1].upper()}: "
-                self.labels[device].set_label(f"{name}{temp:.0f}°")
+                self.titlebar_labels[device].set_label(f"{name}{temp:.0f}°")
 
         if (
             self.current_extruder
@@ -487,15 +518,20 @@ class BasePanel(ScreenPanel):
             and "extruder" in data["toolhead"]
             and data["toolhead"]["extruder"] != self.current_extruder
         ):
-            self.control["item_box"].remove(self.labels[f"{self.current_extruder}_eventbox"])
-            self.current_extruder = data["toolhead"]["extruder"]
-            self.control["item_box"].pack_start(
-                self.labels[f"{self.current_extruder}_eventbox"], True, True, 3
-            )
-            self.control["item_box"].reorder_child(
-                self.labels[f"{self.current_extruder}_eventbox"], 0
-            )
-            self.control["item_box"].show_all()
+            current_key = f"{self.current_extruder}_eventbox"
+            new_key = f"{data['toolhead']['extruder']}_eventbox"
+            if current_key in self.titlebar_labels and new_key in self.titlebar_labels:
+                self.control["item_box"].remove(
+                    self.titlebar_labels[f"{self.current_extruder}_eventbox"]
+                )
+                self.current_extruder = data["toolhead"]["extruder"]
+                self.control["item_box"].pack_start(
+                    self.titlebar_labels[f"{self.current_extruder}_eventbox"], True, True, 3
+                )
+                self.control["item_box"].reorder_child(
+                    self.titlebar_labels[f"{self.current_extruder}_eventbox"], 0
+                )
+                self.control["item_box"].show_all()
 
         return False
 
@@ -505,31 +541,94 @@ class BasePanel(ScreenPanel):
     def set_control_sensitive(self, value=True, control="shortcut"):
         self.control[control].set_sensitive(value)
 
-    def show_shortcut(self, show=True):
-        show = (
-            show
-            and self._config.get_main_config().getboolean("side_macro_shortcut", False)
-            and self._printer.get_printer_status_data()["printer"]["gcode_macros"]["count"] > 0
-            and self._screen._cur_panels[-1] != "printer_select"
+    def _get_shortcut_icon(self, panel):
+        icons = {
+            "notifications": "notifications",
+            "lock_screen": "lock",
+            "gcode_macros": "custom-script",
+            "camera": "camera",
+            "led": "light",
+        }
+        return icons.get(panel, panel)
+
+    def _shortcut_clicked(self, widget, item):
+        if self.shortcut["panel"] == "notifications":
+            self.update_shortcut_icon(level=0)
+        self.menu_item_clicked(widget, item)
+
+    def update_shortcut(self, target):
+        self.shortcut["panel"] = target
+        self.shortcut["icon"] = self._get_shortcut_icon(target)
+        pixbuf = self.control["shortcut"].get_image().get_pixbuf()
+        self.control["shortcut"].set_image(
+            self._gtk.Image(self.shortcut["icon"], pixbuf.get_width(), pixbuf.get_height())
         )
-        self.control["shortcut"].set_visible(show)
-        self.set_control_sensitive(self._screen._cur_panels[-1] != self.shorcut["panel"])
-        self.set_control_sensitive(
-            self._screen._cur_panels[-1] != self.shutdown["panel"], control="shutdown"
+        self.show_shortcut(target)
+
+    def show_shortcut(self, target=None):
+        current_panel = self._screen._cur_panels[-1] if self._screen._cur_panels else None
+        onTarget = current_panel == target
+        if onTarget:
+            self.set_control_sensitive(False, control="shortcut")
+            return
+        if target in ("lock_screen", "notifications"):
+            self.set_control_sensitive(True, control="shortcut")
+            return
+        if (
+            self._printer is None
+            or not self._screen.state.connected
+            or self._screen._cur_panels[-1] == "printer_select"
+        ):
+            self.set_control_sensitive(False, control="shortcut")
+            return
+        status = self._printer.get_printer_status_data() or {}
+        paths = {
+            "gcode_macros": ("printer", "gcode_macros"),
+            "camera": ("moonraker", "cameras"),
+            "led": ("printer", "leds"),
+        }
+        available = True
+        if target in paths:
+            section, key = paths[target]
+            count = status.get(section, {}).get(key, {}).get("count", 0)
+            available = count > 0
+
+        self.set_control_sensitive(available, control="shortcut")
+
+    def update_shortcut_icon(self, level=None):
+        if self.shortcut["panel"] != "notifications":
+            return
+        if level > 0:
+            # Do not downgrade levels unless resetting
+            if self.shortcut["icon"] == "notifications_important":
+                level = 3
+            if self.shortcut["icon"] == "notifications_active":
+                level = 2
+        if level == 3:
+            icon = "notifications_important"
+        elif level in (1, 2):
+            icon = "notifications_active"
+        else:
+            icon = "notifications"
+        self.shortcut["icon"] = icon
+        pixbuf = self.control["shortcut"].get_image().get_pixbuf()
+        self.control["shortcut"].set_image(
+            self._gtk.Image(icon, pixbuf.get_width(), pixbuf.get_height())
         )
 
     def show_printer_select(self, show=True):
-        self.control["printer_select"].set_visible(
-            show and "printer_select" not in self._screen._cur_panels
+        self.control["printer_select"].set_visible(show)
+        self.control["printer_select"].set_sensitive(
+            "printer_select" not in self._screen._cur_panels
         )
 
     def set_title(self, title):
         self.titlebar.get_style_context().remove_class("message_popup_error")
         if (
-            self._screen.connecting_to_printer != "Printer"
+            self._screen.state.printer_name != "Printer"
             and "printer_select" not in self._screen._cur_panels
         ):
-            printer = self._screen.connecting_to_printer
+            printer = self._screen.state.printer_name
         else:
             printer = ""
         if not title:
@@ -609,7 +708,12 @@ class BasePanel(ScreenPanel):
                 logging.info(f"Hidden sensors: {self.hidden_sensors}")
             else:
                 ScreenPanel.hidden_sensors = []
-            self.spoolman_low_limit = self.ks_printer_cfg.getfloat("spool_low_limit", fallback=20)
+            low_limit = self.ks_printer_cfg.getfloat("spool_low_limit", fallback=None)
+            if low_limit is None:
+                low_limit = self._config.get_config().getfloat(
+                    "spoolman", "spool_low_limit", fallback=20.0
+                )
+            self.spoolman_low_limit = low_limit
         else:
             self.titlebar_items = []
             ScreenPanel.hidden_sensors = []
@@ -632,20 +736,39 @@ class BasePanel(ScreenPanel):
         dialog.connect("delete-event", self.close_update_dialog)
         dialog.set_response_sensitive(Gtk.ResponseType.OK, False)
         dialog.get_widget_for_response(Gtk.ResponseType.OK).hide()
+        dialog.close_blocked = True
         self.update_dialog = dialog
-        self._screen.updating = True
+        self._screen.state.updating = True
+        self._screen.base_panel.close_update_timer = GLib.timeout_add_seconds(
+            300, self.unblock_update_dialog
+        )
 
     def finish_updating(self, dialog, response_id):
         if response_id != Gtk.ResponseType.OK:
             return
         logging.info("Finishing update")
-        self._screen.updating = False
+        if self.close_update_timer is not None:
+            GLib.source_remove(self.close_update_timer)
+            self.close_update_timer = None
+        self._screen.state.updating = False
         self._gtk.remove_dialog(dialog)
         self._screen._menu_go_back(home=True)
 
+    def unblock_update_dialog(self):
+        if self.update_dialog is not None:
+            self.update_dialog.close_blocked = False
+        if self.close_update_timer is not None:
+            GLib.source_remove(self.close_update_timer)
+            self.close_update_timer = None
+        return False
+
     def close_update_dialog(self, *args):
+        if self.update_dialog.close_blocked:
+            logging.debug("Update dialog close is blocked by safety timer")
+            return
         logging.info("Closing update dialog")
         if self.update_dialog in self._screen.dialogs:
             self._screen.dialogs.remove(self.update_dialog)
+        self._screen.state.updating = False
         self.update_dialog = None
         self._screen._menu_go_back(home=True)

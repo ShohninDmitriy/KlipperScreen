@@ -101,7 +101,7 @@ class Panel(ScreenPanel):
         self.main.add(self.scroll)
         self.content.add(self.main)
         self.set_loading(True)
-        self._screen._ws.klippy.get_dir_info(self.load_files, self.cur_directory)
+        self._screen._ws.api.get_dir_info(self.load_files, self.cur_directory)
 
     def switch_view_mode(self, widget):
         self.list_mode ^= True
@@ -129,31 +129,29 @@ class Panel(ScreenPanel):
         fbchild = PrintListItem()
         fbchild.set_date(item["modified"])
         fbchild.set_size(item["size"])
-        if "dirname" in item:
-            if item["dirname"].startswith("."):
-                return
+        is_file = "filename" in item
+        is_dir = "dirname" in item
+        if is_dir:
             name = item["dirname"]
+            if name.startswith("."):
+                return None
             path = f"{self.cur_directory}/{name}"
+            basename = name
             fbchild.set_as_dir(True)
-        elif "filename" in item:
-            if item["filename"].startswith(".") or os.path.splitext(item["filename"])[1] not in {
-                ".gcode",
-                ".gco",
-                ".g",
-            }:
-                return
+        elif is_file:
             name = item["filename"]
-            path = f"{self.cur_directory}/{name}"
-            path = path.replace("gcodes/", "")
+            if name.startswith("."):
+                return None
+            basename, ext = os.path.splitext(name)
+            if ext not in {".gcode", ".gco", ".g"}:
+                return None
+            path = f"{self.cur_directory}/{name}".replace("gcodes/", "")
         else:
             logging.error(f"Unknown item {item}")
-            return
-        basename = os.path.splitext(name)[0]
+            return None
         fbchild.set_path(path)
         fbchild.set_name(basename.casefold())
         if self.list_mode:
-            label = Gtk.Label(label=basename, hexpand=True, vexpand=False)
-            format_label(label)
             info = Gtk.Label(
                 hexpand=True,
                 halign=Gtk.Align.START,
@@ -174,7 +172,7 @@ class Panel(ScreenPanel):
                 hexpand=False, vexpand=False, can_focus=False, always_show_image=True
             )
             rename.get_style_context().add_class("color2")
-            rename.set_image(self._gtk.Image("files", self.list_button_size, self.list_button_size))
+            rename.set_image(self._gtk.Image("edit", self.list_button_size, self.list_button_size))
             itemname = Gtk.Label(
                 hexpand=True, halign=Gtk.Align.START, ellipsize=Pango.EllipsizeMode.END
             )
@@ -189,9 +187,9 @@ class Panel(ScreenPanel):
             row.attach(info, 1, 1, 1, 1)
             row.attach(rename, 2, 1, 1, 1)
             row.attach(delete, 3, 1, 1, 1)
-            if "filename" in item:
+            if is_file:
                 icon.connect("clicked", self.confirm_print, path)
-                image_args = (path, icon, self.thumbsize / 2, True, "file")
+                self.image_load(path, icon, self.thumbsize / 2, True, "file")
                 delete.connect("clicked", self.confirm_delete_file, f"gcodes/{path}")
                 rename.connect("clicked", self.show_rename, f"gcodes/{path}")
                 action_icon = "printer" if self._printer.extrudercount > 0 else "load"
@@ -205,9 +203,9 @@ class Panel(ScreenPanel):
                 else:
                     icon.get_style_context().add_class("color3")
                     row.attach(icon, 4, 0, 1, 2)
-            elif "dirname" in item:
+            elif is_dir:
                 icon.connect("clicked", self.change_dir, path)
-                image_args = (None, icon, self.thumbsize / 2, True, "folder")
+                self.image_load(None, icon, self.thumbsize / 2, True, "folder")
                 delete.connect("clicked", self.confirm_delete_directory, path)
                 rename.connect("clicked", self.show_rename, path)
                 action = self._gtk.Button("load", style="color3")
@@ -216,21 +214,16 @@ class Panel(ScreenPanel):
                 action.set_vexpand(False)
                 action.set_halign(Gtk.Align.END)
                 row.attach(action, 4, 0, 1, 2)
-            else:
-                return
             fbchild.add(row)
         else:  # Thumbnail view
             icon = self._gtk.Button(label=basename)
-            if "filename" in item:
+            if is_file:
                 icon.connect("clicked", self.confirm_print, path)
-                image_args = (path, icon, self.thumbsize, False, "file")
-            elif "dirname" in item:
+                self.image_load(path, icon, self.thumbsize, False, "file")
+            elif is_dir:
                 icon.connect("clicked", self.change_dir, path)
-                image_args = (None, icon, self.thumbsize, False, "folder")
-            else:
-                return
+                self.image_load(None, icon, self.thumbsize, False, "folder")
             fbchild.add(icon)
-        self.image_load(*image_args)
         return fbchild
 
     def show_path(self):
@@ -242,7 +235,20 @@ class Panel(ScreenPanel):
             self.labels["path"].show()
 
     def image_load(self, filepath, widget, size=-1, small=True, iconname=None):
-        pixbuf = self.get_file_image(filepath, size, size, small)
+        widget.set_image(self._gtk.Image(iconname, size, size))
+        format_label(widget)
+
+        self.load_image_async(
+            filepath,
+            size,
+            size,
+            small,
+            lambda pixbuf: self._update_image(widget, pixbuf, iconname, size),
+        )
+
+    def _update_image(self, widget, pixbuf, iconname, size):
+        if not widget.get_parent():
+            return
         if pixbuf is not None:
             widget.set_image(Gtk.Image.new_from_pixbuf(pixbuf))
         elif iconname is not None:
@@ -368,13 +374,6 @@ class Panel(ScreenPanel):
         else:
             width = self._screen.width * 0.5
             height = self._screen.height - self._gtk.dialog_buttons_height - self._gtk.font_size * 6
-        pixbuf = self.get_file_image(filename, width, height)
-        if pixbuf is not None:
-            image = Gtk.Image.new_from_pixbuf(pixbuf)
-            image_button = self._gtk.Button()
-            image_button.set_image(image)
-            image_button.connect("clicked", self.show_fullscreen_thumbnail, filename)
-            inside_box.pack_start(image_button, True, True, 0)
 
         info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, vexpand=True)
         fileinfo = Gtk.Label(
@@ -390,13 +389,32 @@ class Panel(ScreenPanel):
             f"{action} {filename}", buttons, main_box, self.confirm_print_response, filename
         )
 
+        self.load_image_async(
+            filename,
+            width,
+            height,
+            callback=lambda p: self._add_print_image(p, inside_box, filename),
+        )
+
+    def _add_print_image(self, pixbuf, inside_box, filename):
+        if not inside_box.get_parent():
+            return
+        if pixbuf is None:
+            return
+        image = Gtk.Image.new_from_pixbuf(pixbuf)
+        image_button = self._gtk.Button()
+        image_button.set_image(image)
+        image_button.connect("clicked", self.show_fullscreen_thumbnail, filename)
+        inside_box.pack_start(image_button, True, True, 0)
+        image_button.show_all()
+
     def confirm_print_response(self, dialog, response_id, filename):
         self._gtk.remove_dialog(dialog)
         if response_id == Gtk.ResponseType.CANCEL:
             return
         elif response_id == Gtk.ResponseType.OK:
             logging.info(f"Starting print: {filename}")
-            self._screen._ws.klippy.print_start(filename)
+            self._screen._ws.api.print_start(filename)
         elif response_id == Gtk.ResponseType.REJECT:
             self.confirm_delete_file(None, f"gcodes/{filename}")
 
@@ -464,7 +482,7 @@ class Panel(ScreenPanel):
                 _("Estimated Time") + f": <b>{self.format_time(fileinfo['estimated_time'])}</b>\n"
             )
         if "job_id" in fileinfo:
-            history = self._screen.apiclient.send_request(
+            history = self._screen.restApi.send_request(
                 f"server/history/job?uid={fileinfo['job_id']}"
             )
             if history and history["job"]["status"] == "completed":
@@ -479,16 +497,25 @@ class Panel(ScreenPanel):
         self.set_loading(True)
         if not result.get("result") or not isinstance(result["result"], dict):
             logging.info(result)
+            self.set_loading(False)
             return
-        items = [
-            self.create_item(item)
-            for item in [*result["result"]["dirs"], *result["result"]["files"]]
-        ]
-        for item in filter(None, items):
-            self.flowbox.add(item)
+
+        items = [*result["result"]["dirs"], *result["result"]["files"]]
+        total = len(items)
+
+        if total == 0:
+            self.set_loading(False)
+            return
+
+        for item in items:
+            fbchild = self.create_item(item)
+            if fbchild is not None:
+                self.flowbox.add(fbchild)
+
         self.set_sort()
         self.set_loading(False)
-        logging.info(f"Loaded in {(datetime.now() - start).total_seconds():.3f} seconds")
+        elapsed = (datetime.now() - start).total_seconds()
+        logging.info(f"Loaded {total} items in {elapsed:.3f} seconds")
 
     def delete_from_list(self, path):
         logging.info(f"deleting {path}")
@@ -535,7 +562,7 @@ class Panel(ScreenPanel):
         self.set_loading(True)
         for child in self.flowbox.get_children():
             self.flowbox.remove(child)
-        self._screen._ws.klippy.get_dir_info(self.load_files, self.cur_directory)
+        self._screen._ws.api.get_dir_info(self.load_files, self.cur_directory)
 
     def set_loading(self, loading):
         self.loading = loading
@@ -556,9 +583,13 @@ class Panel(ScreenPanel):
         for child in self.content.get_children():
             self.content.remove(child)
 
+        if not fullpath.startswith("gcodes/"):
+            fullpath = f"gcodes/{fullpath}"
+
         if "rename_file" not in self.labels:
             self._create_rename_box(fullpath)
         self.content.add(self.labels["rename_file"])
+        self.content.show_all()
         self.labels["new_name"].set_text(fullpath[7:])
         self.labels["new_name"].grab_focus_without_selecting()
         self.showing_rename = True
@@ -602,7 +633,18 @@ class Panel(ScreenPanel):
         self.back()
 
     def show_fullscreen_thumbnail(self, widget, filename):
-        pixbuf = self.get_file_image(filename, self._screen.width * 0.9, self._screen.height * 0.75)
+        width = self._screen.width * 0.9
+        height = self._screen.height * 0.75
+        self.load_image_async(
+            filename,
+            width,
+            height,
+            callback=lambda p: self._show_fullscreen_dialog(p, filename, width, height),
+        )
+
+    def _show_fullscreen_dialog(self, pixbuf, filename, width, height):
+        if not self.content.get_parent():
+            return
         if pixbuf is None:
             return
         image = Gtk.Image.new_from_pixbuf(pixbuf)
