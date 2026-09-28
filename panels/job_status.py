@@ -36,6 +36,7 @@ class Panel(ScreenPanel):
         self.can_close = False
         self.flow_timeout = None
         self.animation_timeout = None
+        self.state_timeout = None
         self.file_metadata = self.fans = {}
         self.state = "standby"
         self.timeleft_type = "auto"
@@ -381,6 +382,7 @@ class Panel(ScreenPanel):
             self.flow_timeout = GLib.timeout_add_seconds(2, self.update_flow)
         if self.animation_timeout is None:
             self.animation_timeout = GLib.timeout_add(500, self.animate_label)
+        self.show_buttons_for_state()
 
     def deactivate(self):
         if self.flow_timeout is not None:
@@ -389,6 +391,9 @@ class Panel(ScreenPanel):
         if self.animation_timeout is not None:
             GLib.source_remove(self.animation_timeout)
             self.animation_timeout = None
+        if self.state_timeout is not None:
+            GLib.source_remove(self.state_timeout)
+            self.state_timeout = None
 
     def create_buttons(self):
         self.buttons = {
@@ -837,12 +842,15 @@ class Panel(ScreenPanel):
             self.state = state
             if self.thumb_dialog:
                 self.close_dialog(self.thumb_dialog)
-        self.show_buttons_for_state()
+            self.show_buttons_for_state()
 
     def _add_timeout(self, timeout):
         self._screen.screensaver.close()
+        if self.state_timeout is not None:
+            GLib.source_remove(self.state_timeout)
+            self.state_timeout = None
         if timeout != 0:
-            GLib.timeout_add_seconds(timeout, self.close_panel)
+            self.state_timeout = GLib.timeout_add_seconds(timeout, self.close_panel)
 
     def show_buttons_for_state(self):
         self.buttons["button_grid"].remove_row(0)
